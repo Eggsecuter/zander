@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import os
 
 class ImageLoader:
 	@staticmethod
@@ -10,7 +9,7 @@ class ImageLoader:
 		if image is None:
 			raise FileNotFoundError(f"Image not found: {path}")
 
-		return image
+		return ImageLoader.__clean(image)
 
 	@staticmethod
 	def from_buffer(buffer: bytearray):
@@ -20,4 +19,13 @@ class ImageLoader:
 		if image is None:
 			raise ValueError("Invalid image bytes")
 
-		return image
+		return ImageLoader.__clean(image)
+
+	@staticmethod
+	def __clean(image):
+		grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		blurred = cv2.GaussianBlur(grayscale, (5, 5), 0)
+
+		_, threshold = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+		return threshold
