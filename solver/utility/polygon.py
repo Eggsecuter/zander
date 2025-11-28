@@ -1,13 +1,37 @@
+import cv2
 import numpy as np
 import math
 
 from shapely.geometry import LineString, Polygon
 from typing import List
 from solver.models.edge import Edge
+from solver.models.puzzle_frame import PuzzleFrame
 from solver.models.vector_2 import Vector2
 
 
 class PolygonUtility:
+	@staticmethod
+	def get_frame(points: List[Vector2]) -> PuzzleFrame:
+		points = np.array(points, dtype=np.float32)
+
+		rectangle = cv2.minAreaRect(points)
+		box = cv2.boxPoints(rectangle)
+
+		s = box.sum(axis=1)
+		diff = np.diff(box, axis=1)
+
+		topLeft = box[np.argmin(s)]
+		bottomRight = box[np.argmax(s)]
+		topRight = box[np.argmin(diff)]
+		bottomLeft = box[np.argmax(diff)]
+
+		return PuzzleFrame(
+			topLeft=Vector2(float(topLeft[0]), float(topLeft[1])),
+			topRight=Vector2(float(topRight[0]), float(topRight[1])),
+			bottomRight=Vector2(float(bottomRight[0]), float(bottomRight[1])),
+			bottomLeft=Vector2(float(bottomLeft[0]), float(bottomLeft[1]))
+		)
+
 	@staticmethod
 	def roughen(points: List[Vector2], epsilon=1.0) -> List[Vector2]:
 		if len(points) < 3:
