@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from solver.models.piece import Piece
 from solver.models.puzzle_frame import PuzzleFrame
+from solver.models.vector_2 import Vector2
 
 
 class Plotter:
@@ -15,7 +16,7 @@ class Plotter:
 			print(str(len(piece.points)) + " - " + str(piece.center_of_mass) + " - " + str(piece.place_transform))
 
 	@staticmethod
-	def print_image(frame: PuzzleFrame, pieces: List[Piece]):
+	def print_image(frame: PuzzleFrame, pieces: List[Piece], cursor: Vector2):
 		img_height, img_width = 2600, 3200
 		img = np.zeros((img_height, img_width, 3), dtype=np.uint8)
 
@@ -63,6 +64,8 @@ class Plotter:
 
 			# Draw placed piece
 			cv2.drawContours(img, [placed_contour], -1, (0, 255, 0), 1)
+
+		cv2.circle(img, (int(cursor.x), int(cursor.y)), 10, (0, 0, 255), -1)
 
 		cv2.imshow("Pieces", img)
 		cv2.waitKey(0)

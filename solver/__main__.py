@@ -1,5 +1,4 @@
-import cv2
-import numpy as np
+import time
 
 from typing import List
 from solver.example.buffer_example import buffer
@@ -32,12 +31,16 @@ class Main:
 		self.image = ShapeDetector.detect(self.image)
 		self.frame, self.pieces = PieceDetector.detect(self.image)
 
+		start_time = time.time()
 		matcher = Matcher(self.frame, self.pieces)
 		matcher.solve()
 
+		delta_time = time.time() - start_time
+		print(f"Matching processed in: {delta_time:.4f} seconds")
+
 		# TODO instead return instructions for server
 		Plotter.print_info(self.frame, self.pieces)
-		Plotter.print_image(self.frame, self.pieces)
+		Plotter.print_image(self.frame, self.pieces, matcher.cursor)
 
 if __name__ == "__main__":
 	main = Main()

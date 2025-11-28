@@ -1,6 +1,5 @@
 
 import math
-import numpy as np
 from dataclasses import dataclass
 from typing import List
 
@@ -19,4 +18,4 @@ class Edge:
 		return math.atan2(dy, dx)
 
 	def get_length(self):
-		return np.hypot(self.end.x - self.start.x, self.end.y - self.start.y)
+		return math.hypot(self.end.x - self.start.x, self.end.y - self.start.y)

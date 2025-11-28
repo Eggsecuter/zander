@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from solver.models.vector_2 import Vector2
 
 class FrameSide(Enum):
-	LONG = 'long'
-	SHORT = 'short'
+	WIDTH = 'width'
+	HEIGHT = 'height'
 
 @dataclass
 class PuzzleFrame:

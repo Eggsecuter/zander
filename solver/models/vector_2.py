@@ -1,6 +1,10 @@
+import math
 from dataclasses import dataclass
 
 @dataclass
 class Vector2:
 	x: float
 	y: float
+
+	def distance_to(self, other: Vector2) -> float:
+		return math.hypot(self.x - other.x, self.y - other.y)
