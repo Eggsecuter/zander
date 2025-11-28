@@ -33,8 +33,8 @@ class Plotter:
 			placed_piece = piece.get_placed_piece()
 
 			# Clip coordinates to image bounds
-			original_contour = np.array([[max(0, min(img_width-1, int(p.x))), max(0, min(img_height-1, int(p.y)))] for p in piece.points], dtype=np.int32)
-			placed_contour = np.array([[max(0, min(img_width-1, int(p.x))), max(0, min(img_height-1, int(p.y)))] for p in placed_piece.points], dtype=np.int32)
+			original_contour = np.array([[int(p.x), int(p.y)] for p in piece.points], dtype=np.int32)
+			placed_contour = np.array([[int(p.x), int(p.y)] for p in placed_piece.points], dtype=np.int32)
 
 			if len(original_contour) == 0:
 				continue
