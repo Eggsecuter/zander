@@ -3,7 +3,7 @@ import numpy as np
 
 from typing import List
 from solver.example.buffer_example import buffer
-from solver.pipeline.edge_detector import EdgeDetector
+from solver.pipeline.shape_detector import ShapeDetector
 from solver.pipeline.image_loader import ImageLoader
 from solver.models.piece import Piece
 from solver.pipeline.piece_detector import PieceDetector
@@ -25,12 +25,25 @@ class Main:
 			print('No image loaded!')
 			return
 
-		self.image = EdgeDetector.detect(self.image)
+		self.image = ShapeDetector.detect(self.image)
 		self.pieces = PieceDetector.detect(self.image)
 
 		for piece in self.pieces:
 			print(str(len(piece.points)) + " - " + str(piece.center_of_mass) + " - " + str(piece.edges))
 
+		# TODO
+		# For each corner combination (4 pieces -> 6 * 4 = 24 possibilities):
+			# Place every corner piece
+			# Calculate the needed transformation and rotation that the piece sits tightly in the frame, relative to the grip point
+
+			# For each side combination (0 or 2 pieces -> 2 possibilities):
+				# Place every side piece
+				# Calculate the needed transformation and rotation that the piece sits tightly in the frame, relative to the grip point
+
+				# Measure the overlap % inside the frame
+				# Save the accuracy and the instructions for each piece to the result list
+
+		# Return the result with the best accuracy (least overlap %)
 		self.print_image()
 
 	def print_image(self):
@@ -56,28 +69,23 @@ class Main:
 			# Optional index
 			cv2.putText(img, str(i), (cx, cy - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
+			# --- Draw edges in green ---
+			if hasattr(piece, "edges"):
+				for edge in piece.edges:
+					x1 = max(0, min(img_width-1, int(edge.start.x)))
+					y1 = max(0, min(img_height-1, int(edge.start.y)))
+					x2 = max(0, min(img_width-1, int(edge.end.x)))
+					y2 = max(0, min(img_height-1, int(edge.end.y)))
+					cv2.line(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
+
 		cv2.imshow("Pieces", img)
 		cv2.waitKey(0)
 		cv2.destroyAllWindows()
 
-
-
-# Detect piece outer edges (straight)
-
-# For each corner combination (4 pieces -> 6 * 4 = 24 possibilities):
-	# Place every corner piece
-	# Calculate the needed transformation and rotation that the piece sits tightly in the frame, relative to the grip point
-
-	# For each side combination (0 or 2 pieces -> 2 possibilities):
-		# Place every side piece
-		# Calculate the needed transformation and rotation that the piece sits tightly in the frame, relative to the grip point
-
-		# Measure the overlap % inside the frame
-		# Save the accuracy and the instructions for each piece to the result list
-
-# Return the result with the best accuracy (least overlap %)
-
 if __name__ == "__main__":
 	main = Main()
+
+	# TODO try over and over again with different margin values (for each method in the whole algorithm) until it finds an optimal solution
 	main.load_image_from_buffer(buffer)
+	# main.load_image_from_path('./data/image-005.png')
 	main.run()

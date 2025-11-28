@@ -7,4 +7,5 @@ from solver.models.vector_2 import Vector2
 
 @dataclass
 class Edge:
-	points: List[Vector2]
+	start: Vector2
+	end: Vector2

@@ -3,7 +3,7 @@ import numpy as np
 
 from typing import Tuple
 
-class EdgeDetector:
+class ShapeDetector:
 	@staticmethod
 	def detect(image):
 		gradient_x = cv2.Sobel(image, cv2.CV_16S, 1, 0)
