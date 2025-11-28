@@ -80,7 +80,7 @@ class PolygonUtility:
 
 	@staticmethod
 	def calculate_edges(points: List[Vector2], line_margin=3.0, connection_margin=100.0, angle_margin_deg=10.0) -> List[Edge]:
-		edges = []
+		edges: List[Edge] = []
 		n = len(points)
 		start = 0
 
@@ -114,7 +114,7 @@ class PolygonUtility:
 			start = end
 
 		# TODO assumption for classic jigsaw puzzle pieces -> take all edges into account for better algorithm
-		edges.sort(key=lambda e: np.hypot(e.end.x - e.start.x, e.end.y - e.start.y), reverse=True)
+		edges.sort(key=lambda e: e.get_length(), reverse=True)
 
 		if len(edges) < 2:
 			return edges  # only one edge available
