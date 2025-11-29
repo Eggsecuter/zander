@@ -24,7 +24,7 @@ Die finale Syntax lautet:
 | :-- | :-- | :-- | :-- |
 | Ready | Robot is ready for instructions | - | `ready\0`|
 | Reset | Positioniert das System in den Ausgangpunkt. | - | `reset\0` |
-| Move | Positioniert den Greifer zu den absoluten Koordinaten. Die Position wird in Mikrometer übergeben (damit eine es als Ganzzahl genau genug ist). | x: uint32, y: uint32 | `move\|x=123456\|y=32089\0` |
+| Move | Positioniert und rotiert den Greifer zu den absoluten Koordinaten. Die Position wird in Mikrometer und die Rotation in Grad übergeben (damit eine es als Ganzzahl genau genug ist). | x: uint32, y: uint32, rot: uint32 | `move\|x=123456\|y=32089\|rot=240\0` |
 | Pick | Greifen des Puzzleteils. | - | `pick\0` |
 | Place | Plaziert das Puzzleteil. | - | `place\0` |
 | Error | Robot ran into error | - | `error\0`|

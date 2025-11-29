@@ -8,6 +8,8 @@ from solver.models.place_transform import PlaceTransform
 from solver.models.puzzle_frame import PuzzleFrame, FrameSide
 from solver.models.vector_2 import Vector2
 
+# TODO GENERALLY -> currently slide along edges is okay. but it has to be extended that it accounts previous edges as well meaning: if it has a previous connecting edge the orientation is invalid (because left to right)
+
 PUZZLE_PIECE_MARGIN = 10 # TODO after implementing (absolute robot coordinates: see solver/shape_detector.py) define real world margin
 
 class Matcher:
@@ -63,7 +65,7 @@ class Matcher:
 		print(len(remaining_pieces))
 
 		# TODO temp
-		if len(remaining_pieces) == 1:
+		if len(remaining_pieces) == 2:
 			return True
 
 		for piece in remaining_pieces:
@@ -160,7 +162,7 @@ class Matcher:
 	def __get_next_direction(self) -> float:
 		# rotate counter clockwise
 		# only 90 degree turns are allowed
-		return (self.current_direction - math.pi / 2 + math.pi) % (2 * math.pi) - math.pi
+		return (self.current_direction + math.pi / 2) % (2 * math.pi)
 
 	def __get_next_cursor_point(self, edge: Edge):
 		# add half the margin to reduce robotic placement issues
