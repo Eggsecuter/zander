@@ -20,11 +20,12 @@ Die finale Syntax lautet:
 ## Nachrichten
 **Hier sind die Nachrichten, die für den vollständigen Programmablauf verwendet werden**
 
-| Typ | Beschreibung | Parameter | Beispiel |
-| :-- | :-- | :-- | :-- |
-| Ready | Robot is ready for instructions | - | `ready\0`|
-| Reset | Positioniert das System in den Ausgangpunkt. | - | `reset\0` |
-| Move | Positioniert und rotiert den Greifer zu den absoluten Koordinaten. Die Position wird in Mikrometer und die Rotation in Grad übergeben (damit eine es als Ganzzahl genau genug ist). | x: uint32, y: uint32, rot: uint32 | `move\|x=123456\|y=32089\|rot=240\0` |
-| Pick | Greifen des Puzzleteils. | - | `pick\0` |
-| Place | Plaziert das Puzzleteil. | - | `place\0` |
-| Error | Robot ran into error | - | `error\0`|
+| Typ | Sender | Beschreibung | Parameter | Beispiel |
+| :-- | :-- | :-- | :-- | :-- |
+| Ready | ET | Robot is ready for instructions | - | `ready\0`|
+| Reset | IT | Positioniert das System in den Ausgangpunkt. | - | `reset\0` |
+| Move | IT | Positioniert und rotiert den Greifer zu den absoluten Koordinaten. Die Position wird in Mikrometer und die Rotation in Grad übergeben (damit eine es als Ganzzahl genau genug ist). | x: uint32, y: uint32, rot: uint32 | `move\|x=123456\|y=32089\|rot=240\0` |
+| Pick | IT | Greifen des Puzzleteils. | - | `pick\0` |
+| Place | IT | Plaziert das Puzzleteil. | - | `place\0` |
+| Finish | IT | Hinweis, dass das Puzzle gelöst ist | - | `finish\0` |
+| Error | ET | Robot ran into error | - | `error\0`|
