@@ -8,32 +8,14 @@ from solver.models.edge import Edge
 from solver.models.puzzle_frame import PuzzleFrame
 from solver.models.vector_2 import Vector2
 
+ROUGHENING_EPSILON: float = 0.05
+EDGE_LINE_MARGIN: float = 0.2
+EDGE_CONNECTION_MARGIN: float = 1.0
+EDGE_CONNECTION_ANGLE_MARGIN_DEGREES: float = 10.0
 
 class PolygonUtility:
 	@staticmethod
-	def get_frame(points: List[Vector2]) -> PuzzleFrame:
-		points = np.array(points, dtype=np.float32)
-
-		rectangle = cv2.minAreaRect(points)
-		box = cv2.boxPoints(rectangle)
-
-		s = box.sum(axis=1)
-		diff = np.diff(box, axis=1)
-
-		topLeft = box[np.argmin(s)]
-		bottomRight = box[np.argmax(s)]
-		topRight = box[np.argmin(diff)]
-		bottomLeft = box[np.argmax(diff)]
-
-		return PuzzleFrame(
-			topLeft=Vector2(float(topLeft[0]), float(topLeft[1])),
-			topRight=Vector2(float(topRight[0]), float(topRight[1])),
-			bottomRight=Vector2(float(bottomRight[0]), float(bottomRight[1])),
-			bottomLeft=Vector2(float(bottomLeft[0]), float(bottomLeft[1]))
-		)
-
-	@staticmethod
-	def roughen(points: List[Vector2], epsilon=1.0) -> List[Vector2]:
+	def roughen(points: List[Vector2], epsilon=ROUGHENING_EPSILON) -> List[Vector2]:
 		if len(points) < 3:
 			return points
 
@@ -42,7 +24,7 @@ class PolygonUtility:
 		index = 0
 
 		for i in range(1, len(points) - 1):
-			dist = PolygonUtility.__perpendicular_distance(points[i], points[0], points[-1])
+			dist = PolygonUtility.perpendicular_distance(points[i], points[0], points[-1])
 			if dist > max_dist:
 				index = i
 				max_dist = dist
@@ -79,7 +61,7 @@ class PolygonUtility:
 		return Vector2(cx, cy)
 
 	@staticmethod
-	def calculate_edges(points: List[Vector2], line_margin=3.0, connection_margin=100.0, angle_margin_deg=10.0) -> List[Edge]:
+	def calculate_edges(points: List[Vector2], line_margin=EDGE_LINE_MARGIN, connection_margin=EDGE_CONNECTION_MARGIN, angle_margin_deg=EDGE_CONNECTION_ANGLE_MARGIN_DEGREES) -> List[Edge]:
 		edges: List[Edge] = []
 		n = len(points)
 		start = 0
@@ -112,6 +94,8 @@ class PolygonUtility:
 				edges.append(Edge(points[start], points[end - 1]))
 
 			start = end
+
+		return edges
 
 		# TODO assumption for classic jigsaw puzzle pieces -> take all edges into account for better algorithm
 		edges.sort(key=lambda e: e.get_length(), reverse=True)
@@ -243,7 +227,7 @@ class PolygonUtility:
 		return True
 
 	@staticmethod
-	def __perpendicular_distance(P, A, B):
+	def perpendicular_distance(P, A, B):
 		# if A and B are the same point
 		if A == B:
 			return ((P.x - A.x)**2 + (P.y - A.y)**2)**0.5

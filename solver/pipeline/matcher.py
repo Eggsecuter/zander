@@ -62,10 +62,8 @@ class Matcher:
 		if len(remaining_pieces) == 0:
 			return True
 
-		print(len(remaining_pieces))
-
 		# TODO temp
-		if len(remaining_pieces) == 2:
+		if len(remaining_pieces) == 3:
 			return True
 
 		for piece in remaining_pieces:
@@ -121,8 +119,6 @@ class Matcher:
 		return True
 
 	def __is_overflowing_frame(self, edge: Edge, margin=1e-3) -> bool:
-		print(self.last_completed_side, self.last_turn)
-
 		if self.last_turn is None:
 			return False
 
