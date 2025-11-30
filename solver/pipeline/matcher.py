@@ -10,7 +10,7 @@ from solver.models.vector_2 import Vector2
 
 # TODO GENERALLY -> currently slide along edges is okay. but it has to be extended that it accounts previous edges as well meaning: if it has a previous connecting edge the orientation is invalid (because left to right)
 
-PUZZLE_PIECE_MARGIN = 10 # TODO after implementing (absolute robot coordinates: see solver/shape_detector.py) define real world margin
+PUZZLE_PIECE_MARGIN = 0.5 # TODO after implementing (absolute robot coordinates: see solver/shape_detector.py) define real world margin
 
 class Matcher:
 	def __init__(self, frame: PuzzleFrame, pieces: List[Piece]):
@@ -42,7 +42,7 @@ class Matcher:
 			root_piece.place_transform.rotation_radiant = self.__rotation_needed(root_piece.edges[edge_index])
 
 			# TODO temp
-			root_piece.place_transform.position = Vector2(1500, 1800)
+			root_piece.place_transform.position = Vector2(30, 15)
 
 			place_root_piece = root_piece.get_placed_piece()
 
@@ -63,7 +63,7 @@ class Matcher:
 			return True
 
 		# TODO temp
-		if len(remaining_pieces) == 3:
+		if len(remaining_pieces) == 2:
 			return True
 
 		for piece in remaining_pieces:
@@ -158,7 +158,12 @@ class Matcher:
 	def __get_next_direction(self) -> float:
 		# rotate counter clockwise
 		# only 90 degree turns are allowed
-		return (self.current_direction + math.pi / 2) % (2 * math.pi)
+		direction = (self.current_direction + math.pi / 2) % (2 * math.pi)
+
+		if direction > math.pi:
+			direction = -(2 * math.pi - direction)
+
+		return direction
 
 	def __get_next_cursor_point(self, edge: Edge):
 		# add half the margin to reduce robotic placement issues
@@ -169,43 +174,25 @@ class Matcher:
 			edge.end.y + move_amount * math.sin(self.current_direction)
 		)
 
-
-
-
-
-
-
-
 	def __is_matching(self, root: Piece, target: Piece) -> bool:
 		# TODO algo
 		return True
 
-
-
-
-
-
-	# TODO cleanup
 	def __calculate_place_transform(self, piece: Piece, edge_index: int) -> PlaceTransform:
 		"""
 		Returns a PlaceTransform that moves & rotates the piece so that:
 		- piece.edges[edge_index].start == self.cursor
 		- piece.edges[edge_index] is pointing along self.current_direction
 		"""
-
-		# --- 1) Compute rotation needed ---
-		first_edge = piece.edges[edge_index]
-		dx = first_edge.end.x - first_edge.start.x
-		dy = first_edge.end.y - first_edge.start.y
-		current_angle = math.atan2(dy, dx)
+		edge = piece.edges[edge_index]
 
 		# rotation needed to align with current_direction
-		rotation_radiant = self.current_direction - current_angle
+		rotation_radiant = self.current_direction - edge.get_angle()
 
 		# --- 2) Compute new center of mass after rotation ---
 		# rotate vector from center_of_mass to first_edge.start
 		cx, cy = piece.center_of_mass.x, piece.center_of_mass.y
-		sx, sy = first_edge.start.x, first_edge.start.y
+		sx, sy = edge.start.x, edge.start.y
 
 		# vector from center to start of edge
 		vx = sx - cx

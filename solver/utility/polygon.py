@@ -8,8 +8,8 @@ from solver.models.edge import Edge
 from solver.models.puzzle_frame import PuzzleFrame
 from solver.models.vector_2 import Vector2
 
-ROUGHENING_EPSILON: float = 0.05
-EDGE_LINE_MARGIN: float = 0.2
+ROUGHENING_EPSILON: float = 0.5
+EDGE_LINE_MARGIN: float = 0.1
 EDGE_CONNECTION_MARGIN: float = 1.0
 EDGE_CONNECTION_ANGLE_MARGIN_DEGREES: float = 10.0
 
@@ -41,6 +41,9 @@ class PolygonUtility:
 
 	@staticmethod
 	def calculate_center_of_mass(points: List[Vector2]) -> Vector2:
+		if len(points) == 0:
+			return Vector2(0, 0)
+
 		area = 0.0
 		cx = 0.0
 		cy = 0.0
@@ -55,6 +58,7 @@ class PolygonUtility:
 			cy += (current.y + next_point.y) * cross
 
 		area *= 0.5
+
 		cx /= (6 * area)
 		cy /= (6 * area)
 
@@ -94,8 +98,6 @@ class PolygonUtility:
 				edges.append(Edge(points[start], points[end - 1]))
 
 			start = end
-
-		return edges
 
 		# TODO assumption for classic jigsaw puzzle pieces -> take all edges into account for better algorithm
 		edges.sort(key=lambda e: e.get_length(), reverse=True)

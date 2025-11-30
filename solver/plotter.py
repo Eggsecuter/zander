@@ -18,32 +18,34 @@ class Plotter:
 	@staticmethod
 	def print_image(image, frame: PuzzleFrame, pieces: List[Piece], cursor: Vector2):
 		img_height, img_width = image.shape[:2]
+
 		img = np.zeros((img_height, img_width, 3), dtype=np.uint8)
 
-		# Helper to convert percentile -> pixel coordinates
+		# Helper to convert percentile -> pixel coordinates (0–100 → image size)
 		def scale(vector: Vector2):
-			x = int(vector.x / 100 * img_width)
-			y = int(vector.y / 100 * img_height)
+			longer_dimension = img_width if img_width > img_height else img_height
+
+			x = int(vector.x / 100 * longer_dimension)
+			y = int(vector.y / 100 * longer_dimension)
 
 			return x, image.shape[0] - y
 
 		# Draw frame
-		original_contour = np.array([
+		frame_contour = np.array([
 			scale(frame.topLeft),
 			scale(frame.topRight),
 			scale(frame.bottomRight),
 			scale(frame.bottomLeft)
 		], np.int32)
-
-		cv2.drawContours(img, [original_contour], -1, (0, 255, 255), 2)
+		cv2.drawContours(img, [frame_contour], -1, (0, 255, 255), 2)
 
 		for i, piece in enumerate(pieces):
-			placed_piece = piece.get_placed_piece()
+			placed_piece = piece.get_placed_piece()  # still in percentiles
 
 			if len(piece.points) == 0:
 				continue
 
-			# Scale contours
+			# Scale contours for drawing
 			original_contour = np.array([scale(p) for p in piece.points], np.int32).reshape((-1, 1, 2))
 			placed_contour = np.array([scale(p) for p in placed_piece.points], np.int32).reshape((-1, 1, 2))
 
@@ -64,10 +66,12 @@ class Plotter:
 
 			# Draw placed piece
 			cv2.drawContours(img, [placed_contour], -1, (0, 255, 0), 1)
+			pcx, pcy = scale(placed_piece.center_of_mass)
+			cv2.circle(img, (pcx, pcy), 5, (0, 255, 0), -1)
 
 			# Draw placed piece edges
 			if hasattr(piece, "edges"):
-				for edge in placed_piece.edges:
+				for index, edge in enumerate(placed_piece.edges):
 					x1, y1 = scale(edge.start)
 					x2, y2 = scale(edge.end)
 					cv2.arrowedLine(img, (x1, y1), (x2, y2), (150, 0, 150), 2, tipLength=0.1)

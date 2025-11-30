@@ -33,7 +33,7 @@ class Main:
 
 		start_time = time.time()
 		matcher = Matcher(self.frame, self.pieces)
-		# matcher.solve()
+		matcher.solve()
 
 		delta_time = time.time() - start_time
 		print(f"Matching processed in: {delta_time:.4f} seconds")

@@ -39,13 +39,17 @@ class PieceDetector:
 
 		Because the margin (for transposition and rotation) are absolute differently sized images would need different margin values, which gets prevented by normalizing the vectors
 		'''
+		img_height, img_width = image.shape[:2]
+
 		# open cv has its origin point at the top left corner
 		# simplify further calculations by having the origin in the bottom left
-		y = image.shape[0] - y
+		y = img_height - y
 
 		# solver calculates with percentile coordinates to be compatible with any further robotic coordinate system
-		x *= 100 / image.shape[1]
-		y *= 100 / image.shape[0]
+		# take the longer dimension to prevent stretching
+		longer_dimension = img_width if img_width > img_height else img_height
+		x *= 100 / longer_dimension
+		y *= 100 / longer_dimension
 
 		return Vector2(float(x), float(y))
 
