@@ -64,7 +64,7 @@ class PolygonUtility:
 		return Vector2(cx, cy)
 
 	@staticmethod
-	def detect_edges(points: List[Vector2], line_epsilon: float, corner_margin: float, corner_margin_radiants: float) -> List[Edge]:
+	def detect_edges(points: List[Vector2], line_epsilon: float, min_length: float, corner_margin: float, corner_margin_radiants: float) -> List[Edge]:
 		'''
 		Detect all points which form a fairly straight line and can be placed against a wall without the rest of the shape colliding first.
 
@@ -75,6 +75,7 @@ class PolygonUtility:
 		Args:
 			points: Shape
 			line_epsilon: Tolerance for straightness of a line
+			min_length: Minimal length of an edge
 			corner_margin: Tolerance for distance to last detected edge line
 			corner_margin_radiants: Tolerance for angle to last detected edge line (ideally 90 degrees)
 		'''
@@ -93,74 +94,58 @@ class PolygonUtility:
 				a = segment[0]
 				b = segment[-1]
 
-				# 1) collinearity check
+				# check collinearity
 				if not all(PolygonUtility.__distance_point_to_line(p, a, b) <= line_epsilon
 						for p in segment):
 					break
 
-				# 2) infinite-line must NOT intersect polygon
+				# check valid frame line
 				if PolygonUtility.__line_intersects_polygon(a, b, points, start % point_count, end % point_count):
 					break
 
-				# 3) polygon must lie entirely on ONE SIDE of infinite line AB
 				if not PolygonUtility.__is_polygon_one_side(a, b, points, start % point_count, end % point_count):
 					break
 
 				end += 1
+
 				if end - start >= point_count:  # full circle reached
 					break
 
 			if end - start >= 2:
 				end -= 1
-				edge = Edge(points, [start % point_count, end % point_count])
-				edges.append(edge)
+
+				start_index = start % point_count
+				end_index = end % point_count
+
+				edge = Edge(points, [start_index, end_index])
+
+				if edge.get_length() >= min_length:
+					edges.append(edge)
 
 			start = end
 
-		return edges
-		# TODO assumption for classic jigsaw puzzle pieces -> take all edges into account for better algorithm
-		edges.sort(key=lambda e: e.get_length(), reverse=True)
+		current_combined_edge = None
+		removal_edge_indices = []
 
-		if len(edges) < 2:
-			return edges  # only one edge available
+		for index, edge in enumerate(edges):
+			other_index = (index + 1) % len(edges)
+			other = edges[other_index]
 
-		e1, e2 = edges[0], edges[1]
+			if edge.end.distance_to(other.start) <= corner_margin and Angle.is_right_angle(edge.get_end_angle(), other.get_start_angle(), corner_margin_radiants):
+				if current_combined_edge is None:
+					current_combined_edge = edge
 
-		# --- Check if edges are connected ---
-		def connected(e1, e2, margin):
-			points1 = [e1.start, e1.end]
-			points2 = [e2.start, e2.end]
-			for p1 in points1:
-				for p2 in points2:
-					if math.hypot(p1.x - p2.x, p1.y - p2.y) <= margin:
-						return True
-			return False
+				current_combined_edge.point_indices.extend(other.point_indices[1:])
+				removal_edge_indices.append(other_index)
+			else:
+				current_combined_edge = None
 
-		if not connected(e1, e2, corner_margin):
-			return [e1]  # not connected
+		# filter marked edges which got combined into an other
+		edges = [edge for index, edge in enumerate(edges) if index not in removal_edge_indices]
 
-		# --- Check if angle between edges is ~90 degrees ---
-		def edge_vector(e):
-			return e.end.x - e.start.x, e.end.y - e.start.y
+		edges.sort(key=lambda edge: edge.get_length(), reverse=True)
 
-		v1x, v1y = edge_vector(e1)
-		v2x, v2y = edge_vector(e2)
-
-		# Cosine of angle
-		dot = v1x*v2x + v1y*v2y
-		len1 = math.hypot(v1x, v1y)
-		len2 = math.hypot(v2x, v2y)
-
-		if len1 == 0 or len2 == 0:
-			return [e1]  # avoid division by zero
-
-		cos_angle = dot / (len1 * len2)
-		angle_deg = math.degrees(math.acos(max(min(cos_angle, 1), -1)))  # clamp due to fp errors
-
-		if abs(angle_deg - 90) <= corner_margin_radiants:
-			return [e1, e2]  # connected and ~90°
-		else:
-			return [e1]
+		return [edges[0]]
 
 	@staticmethod
 	def __perpendicular_distance(P, A, B):

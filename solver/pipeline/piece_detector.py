@@ -11,6 +11,7 @@ FRAME_WIDTH_PERCENTAGE = 30
 
 ROUGHENING_EPSILON: float = 0.05
 EDGE_LINE_EPSILON: float = 0.1
+EDGE_MIN_LENGTH: float = 10.0 # TODO lower
 EDGE_CORNER_MARGIN: float = 1.0
 EDGE_CORNER_MARGIN_DEGREES: float = 10.0
 
@@ -33,7 +34,7 @@ class PieceDetector:
 			else:
 				points = PolygonUtility.roughen(vectors, ROUGHENING_EPSILON)
 				center_of_mass = PolygonUtility.calculate_center_of_mass(points)
-				edges = PolygonUtility.detect_edges(points, EDGE_LINE_EPSILON, EDGE_CORNER_MARGIN, EDGE_CORNER_MARGIN_DEGREES)
+				edges = PolygonUtility.detect_edges(points, EDGE_LINE_EPSILON, EDGE_MIN_LENGTH, EDGE_CORNER_MARGIN, EDGE_CORNER_MARGIN_DEGREES)
 
 				piece = Piece(points, center_of_mass, edges)
 				pieces.append(piece)
