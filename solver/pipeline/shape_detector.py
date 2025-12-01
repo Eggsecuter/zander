@@ -9,7 +9,8 @@ class ShapeDetector:
 		gradient_x = cv2.Sobel(image, cv2.CV_16S, 1, 0)
 		gradient_y = cv2.Sobel(image, cv2.CV_16S, 0, 1)
 
-		gradient_x_abs = np.abs(gradient_x)
-		gradient_y_abs = np.abs(gradient_y)
+		abs
+		gradient_x_absolute = abs(gradient_x)
+		gradient_y_absolute = abs(gradient_y)
 
-		return np.minimum(gradient_x_abs + gradient_y_abs, 255).astype(np.uint8)
+		return np.minimum(gradient_x_absolute + gradient_y_absolute, 255).astype(np.uint8)

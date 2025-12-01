@@ -3,10 +3,12 @@ import math
 from typing import List
 
 from solver.models.edge import Edge
+from solver.models.frame_side import FrameSide
 from solver.models.piece import Piece
 from solver.models.place_transform import PlaceTransform
-from solver.models.puzzle_frame import PuzzleFrame, FrameSide
-from solver.models.vector_2 import Vector2
+from solver.models.placed_piece import PlacedPiece
+from solver.models.puzzle_frame import PuzzleFrame
+from solver.models.vector2 import Vector2
 
 # TODO GENERALLY -> currently slide along edges is okay. but it has to be extended that it accounts previous edges as well meaning: if it has a previous connecting edge the orientation is invalid (because left to right)
 
@@ -44,7 +46,7 @@ class Matcher:
 			# TODO temp
 			root_piece.place_transform.position = Vector2(30, 15)
 
-			place_root_piece = root_piece.get_placed_piece()
+			place_root_piece = PlacedPiece.get_from(place_root_piece)
 
 			solution_found = self.__place_next(place_root_piece, edge_index, self.pieces.copy()[1:])
 
@@ -69,7 +71,7 @@ class Matcher:
 		for piece in remaining_pieces:
 			for edge_index, edge in enumerate(piece.edges):
 				self.__calculate_place_transform(piece, edge_index)
-				placed_piece = piece.get_placed_piece()
+				placed_piece = PlacedPiece.get_from(piece)
 
 				if self.__is_overflowing_frame(placed_piece.edges[edge_index]):
 					continue
@@ -87,7 +89,7 @@ class Matcher:
 		return False
 
 	def __rotation_needed(self, edge: Edge) -> float:
-		delta = self.current_direction - edge.get_angle()
+		delta = self.current_direction - edge.get_end_angle()
 		delta = (delta + math.pi) % (2 * math.pi) - math.pi
 
 		return delta
@@ -96,6 +98,7 @@ class Matcher:
 		old_cursor = self.cursor
 		self.cursor = copy.deepcopy(piece.edges[last_edge_index].end)
 
+		# TODO not needed anymore with combined edges
 		while True:
 			connecting_edge: Edge = None
 
@@ -187,7 +190,7 @@ class Matcher:
 		edge = piece.edges[edge_index]
 
 		# rotation needed to align with current_direction
-		rotation_radiant = self.current_direction - edge.get_angle()
+		rotation_radiant = self.current_direction - edge.get_start_angle()
 
 		# --- 2) Compute new center of mass after rotation ---
 		# rotate vector from center_of_mass to first_edge.start

@@ -3,8 +3,9 @@ from typing import List
 import cv2
 import numpy as np
 from solver.models.piece import Piece
+from solver.models.placed_piece import PlacedPiece
 from solver.models.puzzle_frame import PuzzleFrame
-from solver.models.vector_2 import Vector2
+from solver.models.vector2 import Vector2
 
 
 class Plotter:
@@ -40,7 +41,7 @@ class Plotter:
 		cv2.drawContours(img, [frame_contour], -1, (0, 255, 255), 2)
 
 		for i, piece in enumerate(pieces):
-			placed_piece = piece.get_placed_piece()  # still in percentiles
+			placed_piece = PlacedPiece.get_from(piece)
 
 			if len(piece.points) == 0:
 				continue

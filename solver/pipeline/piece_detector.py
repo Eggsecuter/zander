@@ -4,10 +4,15 @@ import numpy as np
 from typing import List, Tuple
 from solver.models.piece import Piece
 from solver.models.puzzle_frame import PuzzleFrame
-from solver.models.vector_2 import Vector2
+from solver.models.vector2 import Vector2
 from solver.utility.polygon import PolygonUtility
 
 FRAME_WIDTH_PERCENTAGE = 30
+
+ROUGHENING_EPSILON: float = 0.05
+EDGE_LINE_EPSILON: float = 0.1
+EDGE_CORNER_MARGIN: float = 1.0
+EDGE_CORNER_MARGIN_DEGREES: float = 10.0
 
 class PieceDetector:
 	@staticmethod
@@ -26,7 +31,12 @@ class PieceDetector:
 				frame = PieceDetector.get_frame(vectors)
 			# piece
 			else:
-				piece = Piece(vectors)
+				points = PolygonUtility.roughen(vectors, ROUGHENING_EPSILON)
+				center_of_mass = PolygonUtility.calculate_center_of_mass(vectors)
+				edges = PolygonUtility.detect_edges(points, EDGE_LINE_EPSILON, EDGE_CORNER_MARGIN, EDGE_CORNER_MARGIN_DEGREES)
+				print(len(edges))
+
+				piece = Piece(points, center_of_mass, edges)
 				pieces.append(piece)
 
 		return frame, pieces

@@ -1,21 +1,17 @@
-import cv2
 import numpy as np
 import math
 
-from shapely.geometry import LineString, Polygon
 from typing import List
 from solver.models.edge import Edge
-from solver.models.puzzle_frame import PuzzleFrame
-from solver.models.vector_2 import Vector2
-
-ROUGHENING_EPSILON: float = 0.5
-EDGE_LINE_MARGIN: float = 0.1
-EDGE_CONNECTION_MARGIN: float = 1.0
-EDGE_CONNECTION_ANGLE_MARGIN_DEGREES: float = 10.0
+from solver.models.vector2 import Vector2
+from solver.utility.angle import Angle
 
 class PolygonUtility:
 	@staticmethod
-	def roughen(points: List[Vector2], epsilon=ROUGHENING_EPSILON) -> List[Vector2]:
+	def roughen(points: List[Vector2], epsilon) -> List[Vector2]:
+		'''
+		Roughen shape to reduce points and improve further calculation performance.
+		'''
 		if len(points) < 3:
 			return points
 
@@ -24,7 +20,7 @@ class PolygonUtility:
 		index = 0
 
 		for i in range(1, len(points) - 1):
-			dist = PolygonUtility.perpendicular_distance(points[i], points[0], points[-1])
+			dist = PolygonUtility.__perpendicular_distance(points[i], points[0], points[-1])
 			if dist > max_dist:
 				index = i
 				max_dist = dist
@@ -41,6 +37,9 @@ class PolygonUtility:
 
 	@staticmethod
 	def calculate_center_of_mass(points: List[Vector2]) -> Vector2:
+		'''
+		Calculate center of mass
+		'''
 		if len(points) == 0:
 			return Vector2(0, 0)
 
@@ -65,40 +64,58 @@ class PolygonUtility:
 		return Vector2(cx, cy)
 
 	@staticmethod
-	def calculate_edges(points: List[Vector2], line_margin=EDGE_LINE_MARGIN, connection_margin=EDGE_CONNECTION_MARGIN, angle_margin_deg=EDGE_CONNECTION_ANGLE_MARGIN_DEGREES) -> List[Edge]:
+	def detect_edges(points: List[Vector2], line_epsilon: float, corner_margin: float, corner_margin_radiants: float) -> List[Edge]:
+		'''
+		Detect all points which form a fairly straight line and can be placed against a wall without the rest of the shape colliding first.
+
+		Criteria of a valid edge are:
+		- They form a straight line
+		- If extended infinitely, it should not collide with the rest of the polygon
+
+		Args:
+			points: Shape
+			line_epsilon: Tolerance for straightness of a line
+			corner_margin: Tolerance for distance to last detected edge line
+			corner_margin_radiants: Tolerance for angle to last detected edge line (ideally 90 degrees)
+		'''
+		if len(points) < 2:
+			return []
+
 		edges: List[Edge] = []
-		n = len(points)
+		point_count = len(points)
 		start = 0
 
-		while start < n:
+		while start < point_count:
 			end = start + 1
 
-			while end < n:
+			while end < point_count:
 				segment = points[start:end+1]
 				a = segment[0]
 				b = segment[-1]
 
 				# 1) collinearity check
-				if not all(PolygonUtility.distance_point_to_line(p, a, b) <= line_margin
+				if not all(PolygonUtility.__distance_point_to_line(p, a, b) <= line_epsilon
 							for p in segment):
 					break
 
 				# 2) infinite-line must NOT intersect polygon
-				if PolygonUtility.line_intersects_polygon(a, b, points, start, end):
+				if PolygonUtility.__line_intersects_polygon(a, b, points, start, end):
 					break
 
 				# 3) polygon must lie entirely on ONE SIDE of infinite line AB
-				if not PolygonUtility.is_polygon_one_side(a, b, points, start, end):
+				if not PolygonUtility.__is_polygon_one_side(a, b, points, start, end):
 					break
 
 				end += 1
 
 			# Edge must have at least two points
 			if end - start >= 2:
-				edges.append(Edge(points[start], points[end - 1]))
+				edge = Edge(points, [start, end - 1])
+				edges.append(edge)
 
 			start = end
 
+		return edges
 		# TODO assumption for classic jigsaw puzzle pieces -> take all edges into account for better algorithm
 		edges.sort(key=lambda e: e.get_length(), reverse=True)
 
@@ -117,7 +134,7 @@ class PolygonUtility:
 						return True
 			return False
 
-		if not connected(e1, e2, connection_margin):
+		if not connected(e1, e2, corner_margin):
 			return [e1]  # not connected
 
 		# --- Check if angle between edges is ~90 degrees ---
@@ -138,16 +155,27 @@ class PolygonUtility:
 		cos_angle = dot / (len1 * len2)
 		angle_deg = math.degrees(math.acos(max(min(cos_angle, 1), -1)))  # clamp due to fp errors
 
-		if abs(angle_deg - 90) <= angle_margin_deg:
+		if abs(angle_deg - 90) <= corner_margin_radiants:
 			return [e1, e2]  # connected and ~90°
 		else:
 			return [e1]
+
+	@staticmethod
+	def __perpendicular_distance(P, A, B):
+		# if A and B are the same point
+		if A == B:
+			return ((P.x - A.x)**2 + (P.y - A.y)**2)**0.5
+
+		# |(B - A) × (A - P)| / |B - A|
+		numerator = abs((B.x - A.x)*(A.y - P.y) - (B.y - A.y)*(A.x - P.x))
+		denominator = ((B.x - A.x)**2 + (B.y - A.y)**2)**0.5
+		return numerator / denominator
 
 	# -------------------------------------------------------------------------
 	# Point–line distance
 	# -------------------------------------------------------------------------
 	@staticmethod
-	def distance_point_to_line(p, a, b):
+	def __distance_point_to_line(p, a, b):
 		px, py = p.x, p.y
 		ax, ay = a.x, a.y
 		bx, by = b.x, b.y
@@ -161,7 +189,7 @@ class PolygonUtility:
 	# Check if infinite line AB intersects the polygon (except the segment itself)
 	# -------------------------------------------------------------------------
 	@staticmethod
-	def line_intersects_polygon(a, b, points, start_idx, end_idx):
+	def __line_intersects_polygon(a, b, points, start_idx, end_idx):
 		n = len(points)
 
 		for i in range(n):
@@ -174,7 +202,7 @@ class PolygonUtility:
 			p1 = points[i]
 			p2 = points[j]
 
-			if PolygonUtility.segments_intersect(a, b, p1, p2):
+			if PolygonUtility.__segments_intersect(a, b, p1, p2):
 				return True
 
 		return False
@@ -183,7 +211,7 @@ class PolygonUtility:
 	# Segment intersection test
 	# -------------------------------------------------------------------------
 	@staticmethod
-	def segments_intersect(a, b, c, d):
+	def __segments_intersect(a, b, c, d):
 		def orient(p, q, r):
 			return (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x)
 
@@ -202,7 +230,7 @@ class PolygonUtility:
 	# Ensure polygon lies completely on ONE SIDE of line AB
 	# -------------------------------------------------------------------------
 	@staticmethod
-	def is_polygon_one_side(a, b, points, start_idx, end_idx):
+	def __is_polygon_one_side(a, b, points, start_idx, end_idx):
 		ax, ay = a.x, a.y
 		bx, by = b.x, b.y
 
@@ -227,14 +255,3 @@ class PolygonUtility:
 				return False  # found point on other side → invalid edge
 
 		return True
-
-	@staticmethod
-	def perpendicular_distance(P, A, B):
-		# if A and B are the same point
-		if A == B:
-			return ((P.x - A.x)**2 + (P.y - A.y)**2)**0.5
-
-		# |(B - A) × (A - P)| / |B - A|
-		numerator = abs((B.x - A.x)*(A.y - P.y) - (B.y - A.y)*(A.x - P.x))
-		denominator = ((B.x - A.x)**2 + (B.y - A.y)**2)**0.5
-		return numerator / denominator
