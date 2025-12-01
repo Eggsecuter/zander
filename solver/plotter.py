@@ -64,9 +64,10 @@ class Plotter:
 			# Draw edges
 			if hasattr(piece, "edges"):
 				for edge in piece.edges:
-					x1, y1 = scale(edge.start)
-					x2, y2 = scale(edge.end)
-					cv2.arrowedLine(img, (x1, y1), (x2, y2), (255, 0, 0), 2, tipLength=0.1)
+					polyline_points = np.array([scale(point) for point in edge.points[:-1]], dtype=np.int32)
+					cv2.polylines(img, [polyline_points], isClosed=False, color=(255, 0, 0), thickness=2)
+					arrowed_line_points = [scale(point) for point in edge.points[-2:]]
+					cv2.arrowedLine(img, arrowed_line_points[0], arrowed_line_points[1], color=(255, 0, 0), thickness=2, tipLength=0.1)
 
 			# Draw placed piece
 			# cv2.drawContours(img, [placed_contour], -1, (0, 255, 0), 1)

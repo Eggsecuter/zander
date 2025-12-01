@@ -26,6 +26,10 @@ class Edge:
 		return self.shape_points[self.point_indices[-1]]
 
 	@property
+	def points(self):
+		return [self.shape_points[index] for index in self.point_indices]
+
+	@property
 	def corner_count(self):
 		return len(self.points) - 2
 
