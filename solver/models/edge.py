@@ -34,13 +34,16 @@ class Edge:
 		return len(self.points) - 2
 
 	def get_length(self):
+		'''
+		Get complete length of all lines
+		'''
 		length: float = 0
 
 		for index in range(len(self.point_indices) - 1):
 			line_start = self.shape_points[self.point_indices[index]]
 			line_end = self.shape_points[self.point_indices[index + 1]]
 
-			length += math.hypot(line_end.x - line_start.x, line_end.y - line_start.y)
+			length += line_end.distance_to(line_start)
 
 		return length
 

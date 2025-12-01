@@ -33,14 +33,14 @@ class Main:
 
 		start_time = time.time()
 		matcher = Matcher(self.frame, self.pieces)
-		# matcher.solve()
+		matcher.solve()
 
 		delta_time = time.time() - start_time
 		print(f"Matching processed in: {delta_time:.4f} seconds")
 
 		# TODO instead return instructions for server
 		Plotter.print_info(self.frame, self.pieces)
-		Plotter.print_image(self.image, self.frame, self.pieces, matcher.cursor)
+		Plotter.print_image(self.image, self.frame, self.pieces, matcher.current_cursor)
 
 if __name__ == "__main__":
 	main = Main()

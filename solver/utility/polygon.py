@@ -145,7 +145,7 @@ class PolygonUtility:
 
 		edges.sort(key=lambda edge: edge.get_length(), reverse=True)
 
-		return [edges[0]]
+		return edges
 
 	@staticmethod
 	def __perpendicular_distance(P, A, B):
