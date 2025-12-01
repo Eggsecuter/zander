@@ -32,9 +32,8 @@ class PieceDetector:
 			# piece
 			else:
 				points = PolygonUtility.roughen(vectors, ROUGHENING_EPSILON)
-				center_of_mass = PolygonUtility.calculate_center_of_mass(vectors)
+				center_of_mass = PolygonUtility.calculate_center_of_mass(points)
 				edges = PolygonUtility.detect_edges(points, EDGE_LINE_EPSILON, EDGE_CORNER_MARGIN, EDGE_CORNER_MARGIN_DEGREES)
-				print(len(edges))
 
 				piece = Piece(points, center_of_mass, edges)
 				pieces.append(piece)

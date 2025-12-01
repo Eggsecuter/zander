@@ -88,29 +88,31 @@ class PolygonUtility:
 		while start < point_count:
 			end = start + 1
 
-			while end < point_count:
-				segment = points[start:end+1]
+			while True:
+				segment = [points[i % point_count] for i in range(start, end + 1)]
 				a = segment[0]
 				b = segment[-1]
 
 				# 1) collinearity check
 				if not all(PolygonUtility.__distance_point_to_line(p, a, b) <= line_epsilon
-							for p in segment):
+						for p in segment):
 					break
 
 				# 2) infinite-line must NOT intersect polygon
-				if PolygonUtility.__line_intersects_polygon(a, b, points, start, end):
+				if PolygonUtility.__line_intersects_polygon(a, b, points, start % point_count, end % point_count):
 					break
 
 				# 3) polygon must lie entirely on ONE SIDE of infinite line AB
-				if not PolygonUtility.__is_polygon_one_side(a, b, points, start, end):
+				if not PolygonUtility.__is_polygon_one_side(a, b, points, start % point_count, end % point_count):
 					break
 
 				end += 1
+				if end - start >= point_count:  # full circle reached
+					break
 
-			# Edge must have at least two points
 			if end - start >= 2:
-				edge = Edge(points, [start, end - 1])
+				end -= 1
+				edge = Edge(points, [start % point_count, end % point_count])
 				edges.append(edge)
 
 			start = end
@@ -196,8 +198,12 @@ class PolygonUtility:
 			j = (i + 1) % n
 
 			# skip edges of the current segment
-			if start_idx - 1 <= i <= end_idx:
-				continue
+			if start_idx <= end_idx:
+				if start_idx - 1 <= i <= end_idx:
+					continue
+			else:  # wrap-around case
+				if i >= start_idx - 1 or i <= end_idx:
+					continue
 
 			p1 = points[i]
 			p2 = points[j]
@@ -238,8 +244,12 @@ class PolygonUtility:
 
 		for i, p in enumerate(points):
 			# skip points that define the edge itself
-			if start_idx <= i <= end_idx:
-				continue
+			if start_idx <= end_idx:
+				if start_idx <= i <= end_idx:
+					continue
+			else:  # wrap-around
+				if i >= start_idx or i <= end_idx:
+					continue
 
 			# compute cross product sign
 			cross = (bx - ax) * (p.y - ay) - (by - ay) * (p.x - ax)

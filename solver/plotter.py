@@ -53,6 +53,9 @@ class Plotter:
 			# Draw original piece
 			cv2.drawContours(img, [original_contour], -1, (0, 0, 255), 1)
 
+			for point in piece.points:
+				cv2.circle(img, (scale(point)), 5, (0, 0, 255), -1)
+
 			# Draw center of mass
 			cx, cy = scale(piece.center_of_mass)
 			cv2.circle(img, (cx, cy), 5, (0, 0, 255), -1)
@@ -66,16 +69,16 @@ class Plotter:
 					cv2.arrowedLine(img, (x1, y1), (x2, y2), (255, 0, 0), 2, tipLength=0.1)
 
 			# Draw placed piece
-			cv2.drawContours(img, [placed_contour], -1, (0, 255, 0), 1)
-			pcx, pcy = scale(placed_piece.center_of_mass)
-			cv2.circle(img, (pcx, pcy), 5, (0, 255, 0), -1)
+			# cv2.drawContours(img, [placed_contour], -1, (0, 255, 0), 1)
+			# pcx, pcy = scale(placed_piece.center_of_mass)
+			# cv2.circle(img, (pcx, pcy), 5, (0, 255, 0), -1)
 
 			# Draw placed piece edges
-			if hasattr(piece, "edges"):
-				for index, edge in enumerate(placed_piece.edges):
-					x1, y1 = scale(edge.start)
-					x2, y2 = scale(edge.end)
-					cv2.arrowedLine(img, (x1, y1), (x2, y2), (150, 0, 150), 2, tipLength=0.1)
+			# if hasattr(piece, "edges"):
+			# 	for index, edge in enumerate(placed_piece.edges):
+			# 		x1, y1 = scale(edge.start)
+			# 		x2, y2 = scale(edge.end)
+			# 		cv2.arrowedLine(img, (x1, y1), (x2, y2), (150, 0, 150), 2, tipLength=0.1)
 
 		# Draw cursor
 		cx, cy = scale(cursor)
