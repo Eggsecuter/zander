@@ -39,7 +39,6 @@ class Main:
 		print(f"Matching processed in: {delta_time:.4f} seconds")
 
 		# TODO instead return instructions for server
-		Plotter.print_info(self.frame, self.pieces)
 		Plotter.print_image(self.image, self.frame, self.pieces, matcher.current_cursor)
 
 if __name__ == "__main__":

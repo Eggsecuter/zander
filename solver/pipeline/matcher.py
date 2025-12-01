@@ -10,6 +10,7 @@ from solver.models.placed_piece import PlacedPiece
 from solver.models.puzzle_frame import PuzzleFrame
 from solver.models.vector2 import Vector2
 from solver.plotter import Plotter
+from solver.utility.polygon import PolygonUtility
 
 # TODO define real world margin
 PUZZLE_PIECE_MARGIN = 1.0
@@ -65,6 +66,8 @@ class Matcher:
 			if solved:
 				print(f'Solution found in {self.place_count} steps')
 				break
+
+		self.__transform_into_frame()
 
 	def __place_next(self, previous: PlacedPiece, remaining_pieces: List[Piece]) -> bool:
 		if len(remaining_pieces) == 0:
@@ -141,3 +144,17 @@ class Matcher:
 
 		piece.place_transform.position = position
 		piece.place_transform.rotation_radiant = rotation_radiant
+
+	def __transform_into_frame(self):
+		# cursor history forms frame
+		relative_frame_center_of_mass = PolygonUtility.calculate_center_of_mass(self.cursor_history)
+
+		frame_center_of_mass = Vector2(
+			self.frame.bottomLeft.x + self.frame.get_width() / 2,
+			self.frame.bottomLeft.y + self.frame.get_height() / 2
+		)
+
+		translation = frame_center_of_mass - relative_frame_center_of_mass
+
+		for piece in self.pieces:
+			piece.place_transform.position += translation

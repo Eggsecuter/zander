@@ -73,10 +73,10 @@ class PieceDetector:
 		s = box.sum(axis=1)
 		diff = np.diff(box, axis=1)
 
-		topLeft = box[np.argmin(s)]
-		bottomRight = box[np.argmax(s)]
-		topRight = box[np.argmin(diff)]
-		bottomLeft = box[np.argmax(diff)]
+		topLeft = box[np.argmax(diff)]
+		bottomRight = box[np.argmin(diff)]
+		topRight = box[np.argmax(s)]
+		bottomLeft = box[np.argmin(s)]
 
 		return PuzzleFrame(
 			topLeft=Vector2(float(topLeft[0]), float(topLeft[1])),
