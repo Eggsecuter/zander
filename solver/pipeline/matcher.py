@@ -64,10 +64,9 @@ class Matcher:
 			solved = self.__place_next(placed_root_piece, self.pieces[1:])
 
 			if solved:
+				self.__transform_into_frame()
 				print(f'Solution found in {self.place_count} steps')
 				break
-
-		self.__transform_into_frame()
 
 	def __place_next(self, previous: PlacedPiece, remaining_pieces: List[Piece]) -> bool:
 		if len(remaining_pieces) == 0:

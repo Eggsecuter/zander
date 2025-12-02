@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=4 uid="uid://bjuccts6qhpan"]
+
+[ext_resource type="PackedScene" uid="uid://b4j4pp0h7jigf" path="res://Models/DifficultPuzzle/puzzleFrame.gltf" id="1_llkil"]
+[ext_resource type="Material" uid="uid://dr5hocuqbb4hn" path="res://Materials/puzzle.tres" id="2_4dk4q"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_jr3ag"]
+_surfaces = [{
+"aabb": AABB(0.20189103, -0.21, 0, 0.296, 0.42, 0.0060012946),
+"format": 34896613377,
+"index_count": 96,
+"index_data": PackedByteArray("AAABAAIAAQADAAIABAAAAAIAAAAFAAEABAACAAYABAAHAAAAAgADAAgAAgAIAAYAAQAJAAMABwADAAkACgAJAAEABQAKAAEABwAJAAsAAAALAAUAAAAHAAsADAADAAcADAAIAAMABAAMAAcACwAJAA0ACgANAAkABgAIAA0ABgANAAoADgANAAgACwANAA4ADgAIAAwABQALAA4ADwAGAAoABQAPAAoADwAEAAYABQAOAA8ADwAMAAQADwAOAAwA"),
+"name": "material_0",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 16,
+"vertex_data": PackedByteArray("ygf/BAAAAAAAAP//AAAAAAAAAAAAAAAAAAAAAP//AAA0+P8EAAAAAMoH//oAAAAA//8AAAAAAADKB/8E//8AAP//AAD//wAAAAD/////AAD/////AAAAAMoH//r//wAANPj/BP//AAD///////8AADT4//r//wAANPj/+gAAAAA=")
+}]
+blend_shape_mode = 0
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_fsktn"]
+resource_name = "AuxScene_mesh"
+_surfaces = [{
+"aabb": AABB(0.20189103, -0.21, 0, 0.296, 0.42, 0.0060012946),
+"format": 34896613383,
+"index_count": 96,
+"index_data": PackedByteArray("AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8A"),
+"material": ExtResource("2_4dk4q"),
+"name": "material_0",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 96,
+"vertex_data": PackedByteArray("ygf/BAAA//8AAP//AAD//wAAAAAAAP//ygf/BAAA///KB//6AAD//wAA//8AAP//NPj/BAAA//8AAAAAAAD/////AAAAAP//NPj/BAAA///KB/8EAAD//wAAAAAAAP//NPj/+gAA/////wAAAAD///////8AAP//NPj/+gAA//80+P8EAAD/////AAAAAP//ygf/+gAA////////AAD//wAA//8AAP//ygf/+gAA//80+P/6AAD///////8AAP//ygf/BP///78AAP//////v8oH//r///+/ygf/BP///78AAAAA////vwAA//////+/NPj/BP///78AAAAA////v8oH/wT///+/NPj/BP///7///wAA////vwAAAAD///+/NPj/+v///7///wAA////vzT4/wT///+/NPj/+v///7//////////v///AAD///+/ygf/+v///7//////////vzT4//r///+/ygf/+v///78AAP//////v/////////+///8AAAAA//////////////////8AAP////8AAAAA/////wAA////////////////AAD//wAA/78AAAAA////vwAAAAAAAP+/AAD//wAA/78AAP//////vwAAAAD///+/NPj/+gAA/780+P8E////vzT4/wQAAP+/NPj/+gAA/780+P/6////vzT4/wT///+/ygf/BAAA///KB//6/////8oH//oAAP//ygf/BAAA///KB/8E/////8oH//r//////////wAA//8AAP///////wAA//8AAP///////wAA/////////////wAA////////AAAAAAAA/////wAA////////AAAAAP//AAAAAAAA//8AAAAA////////AAD/////ygf/+gAA//80+P/6/////zT4//oAAP//ygf/+gAA///KB//6/////zT4//r/////NPj/BAAA///KB/8E/////8oH/wQAAP//NPj/BAAA//80+P8E/////8oH/wT//////z//v/8//7//P/+//z//v/8//7//P/+//z//v/8//7//P/+//z//v/8//7//P/+//z//v/8//7//P/+//z//v/8//7//P/+//z//v/8//7//P/+//z//v/8//7//P/+//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//7//f/+//3//v/9//7//f/+//3//v/9//3////9/////f////3////9/////f////3////9/////f////3////9/////f////7//f/+//3//v/9//7//f/+//3//v/9//3//v/9//7//f/+//3//v/9//7//f/+//3//P/9//z//f/8//3//P/9//z//f/8//3//P/9//z//f/8//3//P/9//z//f/8//3//v/9//7//f/+//3//v/9//7//f/+/")
+}]
+blend_shape_mode = 0
+shadow_mesh = SubResource("ArrayMesh_jr3ag")
+
+[node name="AuxScene" instance=ExtResource("1_llkil")]
+
+[node name="Mesh" parent="." index="0"]
+mesh = SubResource("ArrayMesh_fsktn")

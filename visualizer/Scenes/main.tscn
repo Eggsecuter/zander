@@ -1,0 +1,72 @@
+[gd_scene load_steps=14 format=3 uid="uid://btytmia6ieog2"]
+
+[ext_resource type="Script" uid="uid://bp667ap83cfdd" path="res://Scripts/main.gd" id="1_jjgbg"]
+[ext_resource type="PackedScene" uid="uid://dneynphb58lsc" path="res://Scenes/Sphere.tscn" id="2_hptm8"]
+[ext_resource type="Script" uid="uid://bpaulnohlixc" path="res://Scripts/camera.gd" id="2_ynf5e"]
+[ext_resource type="PackedScene" uid="uid://ylkvxp1j1rcg" path="res://Scenes/SimplePuzzle/frame.tscn" id="9_ynf5e"]
+[ext_resource type="PackedScene" uid="uid://b68hw8r2dk43q" path="res://Scenes/SimplePuzzle/leftBottom.tscn" id="10_wsu2k"]
+[ext_resource type="PackedScene" uid="uid://bbukx37xariqw" path="res://Scenes/SimplePuzzle/leftMiddle.tscn" id="11_k12tt"]
+[ext_resource type="PackedScene" uid="uid://cxiuam5ym6ler" path="res://Scenes/SimplePuzzle/leftTop.tscn" id="12_h1bgf"]
+[ext_resource type="PackedScene" uid="uid://dlf2goyjedjgr" path="res://Scenes/SimplePuzzle/rightBottom.tscn" id="13_b3802"]
+[ext_resource type="PackedScene" uid="uid://2jhwfk7iwp7s" path="res://Scenes/SimplePuzzle/rightMiddle.tscn" id="14_fevyy"]
+[ext_resource type="PackedScene" uid="uid://c4qtmp1jw3pnf" path="res://Scenes/SimplePuzzle/rightTop.tscn" id="15_hibaj"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7u77a"]
+size = Vector3(0.37, 0.01, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jjgbg"]
+emission_enabled = true
+emission = Color(0.7204674, 0.7204675, 0.7204674, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bo1nx"]
+material = SubResource("StandardMaterial3D_jjgbg")
+size = Vector3(0.37, 0.01, 0.3)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_jjgbg")
+debug_sphere = ExtResource("2_hptm8")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.6794157, 0.18034278, -0.71124595, 0, 0.96932536, 0.24578112, 0.73375356, -0.16698755, 0.6585749, 0, 0.09521805, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0.25, 0)
+fov = 63.0
+size = 0.3
+script = ExtResource("2_ynf5e")
+
+[node name="Surface" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Surface"]
+shape = SubResource("BoxShape3D_7u77a")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Surface"]
+mesh = SubResource("BoxMesh_bo1nx")
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="Frame" parent="." instance=ExtResource("9_ynf5e")]
+transform = Transform3D(0.4, 0, 0, 0, -1.7484556e-08, -0.4, 0, 0.4, -1.7484556e-08, -0.115, 0.007, -0.003)
+
+[node name="SimplePuzzle" type="Node3D" parent="."]
+
+[node name="AuxScene" parent="SimplePuzzle" instance=ExtResource("10_wsu2k")]
+transform = Transform3D(0.14592616, 0.36167046, -1.5809118e-08, 0, -1.7047439e-08, -0.39, -0.36167046, 0.14592616, -6.378635e-09, 0.11371707, 0.01, -0.07765578)
+
+[node name="AuxScene2" parent="SimplePuzzle" instance=ExtResource("11_k12tt")]
+transform = Transform3D(-0.08587282, 0.3804285, -1.6629055e-08, 0, -1.7047439e-08, -0.39, -0.3804285, -0.08587282, 3.7536196e-09, 0.026254969, 0.01, -0.08559647)
+
+[node name="AuxScene3" parent="SimplePuzzle" instance=ExtResource("12_h1bgf")]
+transform = Transform3D(-0.38982347, -0.011733145, 5.12872e-10, 0, -1.7047439e-08, -0.39, 0.011733145, -0.38982347, 1.7039723e-08, 0.11062491, 0.01, 0.08566128)
+
+[node name="AuxScene4" parent="SimplePuzzle" instance=ExtResource("13_b3802")]
+transform = Transform3D(-0.14439093, 0.36228615, -1.583603e-08, 0, -1.7047439e-08, -0.39, -0.36228615, -0.14439093, 6.3115273e-09, 0.01685235, 0.01, -0.00091663003)
+
+[node name="AuxScene5" parent="SimplePuzzle" instance=ExtResource("14_fevyy")]
+transform = Transform3D(-0.33545354, -0.19892438, 8.69526e-09, 0, -1.7047439e-08, -0.39, 0.19892438, -0.33545354, 1.4663139e-08, 0.018878745, 0.01, 0.08409425)
+
+[node name="AuxScene6" parent="SimplePuzzle" instance=ExtResource("15_hibaj")]
+transform = Transform3D(-0.03763051, -0.3881803, 1.6967897e-08, 0, -1.7047439e-08, -0.39, 0.3881803, -0.03763051, 1.6448817e-09, 0.10378343, 0.01, -0.00429672)
