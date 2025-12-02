@@ -2,6 +2,8 @@ import copy
 import math
 from typing import List
 
+from shapely import Polygon
+
 from solver.models.edge import Edge
 from solver.models.frame_side import FrameSide
 from solver.models.piece import Piece
@@ -15,6 +17,8 @@ from solver.utility.polygon import PolygonUtility
 # TODO define real world margin
 PUZZLE_PIECE_MARGIN = 1.0
 FULL_CIRCLE_MARGIN = 1.0
+CONTOUR_MATCH_MARGIN = 0.3
+CONTOUR_HOLE_MARGIN = 0.01
 
 class Matcher:
 	@property
@@ -25,7 +29,8 @@ class Matcher:
 	def current_direction(self) -> float:
 		return self.direction_history[-1]
 
-	def __init__(self, frame: PuzzleFrame, pieces: List[Piece]):
+	def __init__(self, image, frame: PuzzleFrame, pieces: List[Piece]):
+		self.image = image
 		self.frame = frame
 		self.pieces = pieces
 
@@ -77,12 +82,20 @@ class Matcher:
 
 		for piece in remaining_pieces:
 			for edge_index in range(len(piece.edges)):
+				#
+				# USED FOR DEBUGGING
+				#
+				# Plotter.print_image(self.image, self.frame, self.pieces, self.current_cursor)
+
 				self.place_count += 1
 
 				self.__calculate_place_transform(piece, piece.edges[edge_index])
 				placed_piece = PlacedPiece.get_from(piece)
 
-				# TODO check contours
+				matching_contours = self.__check_contours(previous, placed_piece)
+
+				if not matching_contours:
+					break
 
 				self.__update_placement_orientation(placed_piece.edges[edge_index])
 
@@ -143,6 +156,21 @@ class Matcher:
 
 		piece.place_transform.position = position
 		piece.place_transform.rotation_radiant = rotation_radiant
+
+	def __check_contours(self, left: PlacedPiece, right: PlacedPiece) -> bool:
+		# shrunk polygon for looser check
+		left_polygon = Polygon([(vector.x, vector.y) for vector in left.points]).buffer(-CONTOUR_MATCH_MARGIN)
+		right_polygon = Polygon([(vector.x, vector.y) for vector in right.points]).buffer(-CONTOUR_MATCH_MARGIN)
+
+		if left_polygon.intersects(right_polygon) and not left_polygon.touches(right_polygon):
+			return False
+
+		union = left_polygon.union(right_polygon)
+
+		if not math.isclose(union.area, left_polygon.area + right_polygon.area, rel_tol=CONTOUR_HOLE_MARGIN):
+			return False
+
+		return True
 
 	def __transform_into_frame(self):
 		# cursor history forms frame

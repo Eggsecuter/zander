@@ -1,7 +1,9 @@
 import sys
 import asyncio
 
+from solver.example.buffer_example import buffer
 from solver.client_handler import ClientHandler
+from solver.solver import Solver
 
 HOST: str = '127.0.0.1'
 PORT: int = 6048
@@ -19,10 +21,22 @@ async def main(port: int):
 	async with server:
 		await server.serve_forever()
 
+def main_debug():
+	main = Solver(True)
+	main.load_image_from_buffer(buffer)
+	main.run()
+
 if __name__ == "__main__":
 	port: int = PORT
+	debug = False
 
-	if len(sys.argv) >= 2 and sys.argv[1].isdigit():
-		port = int(sys.argv[1])
+	if len(sys.argv) >= 2:
+		if sys.argv[1].isdigit():
+			port = int(sys.argv[1])
+		elif sys.argv[1] == '--debug':
+			debug = True
 
-	asyncio.run(main(port))
+	if debug:
+		main_debug()
+	else:
+		asyncio.run(main(port))

@@ -3,7 +3,7 @@ import math
 from dataclasses import asdict
 from typing import List
 
-from solver.main import Main
+from solver.solver import Solver
 from solver.messages.camera import CameraMessage
 from solver.messages.move import MoveMessage
 from solver.messages.ready import ReadyMessage
@@ -48,7 +48,7 @@ class ClientHandler:
 
 		self.moves = []
 
-		main = Main()
+		main = Solver()
 		main.load_image_from_buffer(message.data)
 		pieces = main.run()
 

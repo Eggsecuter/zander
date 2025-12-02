@@ -71,27 +71,28 @@ func move(message: MoveMessage):
 	print("Move grabX:%f grabY:%f placeX:%f placeY:%f rotationDegrees:%f" % [message.grab_x, message.grab_y, message.place_x, message.place_y, message.rotation_degrees])
 
 	raycast.position = to_absolute(message.grab_x, raycast.position.y, message.grab_y)
+	await get_tree().create_timer(2).timeout
 
-	if raycast.is_colliding():
-		var collider = raycast.get_collider()
-
-		if collider is Area3D:
-			var puzzle_piece = collider.get_parent()
-			var tween = create_tween()
-
-			tween.tween_property(
-				puzzle_piece, "position",
-				to_absolute(message.place_x, puzzle_piece.position.y, message.place_y),
-				0.5
-			)
-
-			tween.tween_property(
-				puzzle_piece, "rotation_degrees",
-				Vector3(puzzle_piece.rotation_degrees.x, puzzle_piece.rotation_degrees.y + message.rotation_degrees, puzzle_piece.rotation_degrees.z),
-				0.5
-			)
-
-			await tween.finished
+	#if raycast.is_colliding():
+		#var collider = raycast.get_collider()
+#
+		#if collider is Area3D:
+			#var puzzle_piece = collider.get_parent()
+			#var tween = create_tween()
+#
+			#tween.tween_property(
+				#puzzle_piece, "rotation_degrees",
+				#Vector3(puzzle_piece.rotation_degrees.x, puzzle_piece.rotation_degrees.y - message.rotation_degrees, puzzle_piece.rotation_degrees.z),
+				#0.5
+			#)
+#
+			#tween.tween_property(
+				#puzzle_piece, "position",
+				#to_absolute(message.place_x, puzzle_piece.position.y, message.place_y),
+				#0.5
+			#)
+#
+			#await tween.finished
 
 	send_message(ReadyMessage.new())
 
@@ -100,7 +101,7 @@ func to_absolute(percentile_x: float, y: float, percentile_y: float):
 	var point = Vector3(-0.185, y, 0.15)
 	
 	point.x += 0.37 * percentile_x / 100
-	point.z -= 0.37 * percentile_y / 100
+	point.z -= 0.3 * percentile_y / 100
 	
 	var instance = debug_sphere.instantiate()
 	instance.global_position = point

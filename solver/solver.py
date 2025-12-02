@@ -9,9 +9,11 @@ from solver.pipeline.shape_detector import ShapeDetector
 from solver.plotter import Plotter
 
 
-class Main:
+class Solver:
 	# overview of fields
-	def __init__(self):
+	def __init__(self, debug: bool):
+		self.debug = debug
+
 		self.image = None
 		self.frame: PuzzleFrame = None
 		self.pieces: List[Piece] = None
@@ -32,12 +34,13 @@ class Main:
 		self.frame, self.pieces = PieceDetector.detect(self.image)
 
 		start_time = time.time()
-		matcher = Matcher(self.frame, self.pieces)
+		matcher = Matcher(self.image, self.frame, self.pieces)
 		matcher.solve()
 
 		delta_time = time.time() - start_time
 		print(f"Matching processed in: {delta_time:.4f} seconds")
 
-		# Plotter.print_image(self.image, self.frame, self.pieces, matcher.current_cursor)
+		if self.debug:
+			Plotter.print_image(self.image, self.frame, self.pieces, matcher.current_cursor)
 
 		return self.pieces
