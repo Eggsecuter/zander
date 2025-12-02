@@ -44,7 +44,7 @@ radius = 0.02
 mesh = SubResource("ArrayMesh_pu2y4")
 
 [node name="Area3D" type="Area3D" parent="." index="1"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -0.006431902, 0.017748967, 0)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -0.014891462, 0.013996307, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 shape = SubResource("CylinderShape3D_ujdq4")

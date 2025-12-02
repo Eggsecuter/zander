@@ -45,6 +45,7 @@ mesh = SubResource("BoxMesh_bo1nx")
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+hit_from_inside = true
 collide_with_areas = true
 collide_with_bodies = false
 
@@ -60,13 +61,13 @@ transform = Transform3D(0.14592616, 0.36167046, -1.5809118e-08, 0, -1.7047439e-0
 transform = Transform3D(-0.08587282, 0.3804285, -1.6629055e-08, 0, -1.7047439e-08, -0.39, -0.3804285, -0.08587282, 3.7536196e-09, 0.026254969, 0.01, -0.08559647)
 
 [node name="AuxScene3" parent="SimplePuzzle" instance=ExtResource("12_h1bgf")]
-transform = Transform3D(-0.38982347, -0.011733145, 5.12872e-10, 0, -1.7047439e-08, -0.39, 0.011733145, -0.38982347, 1.7039723e-08, 0.11062491, 0.01, 0.08566128)
+transform = Transform3D(-0.3898235, -0.011733146, 5.1287213e-10, 0, -1.7047443e-08, -0.39, 0.011733146, -0.3898235, 1.7039724e-08, 0.11062491, 0.01, 0.08566128)
 
 [node name="AuxScene4" parent="SimplePuzzle" instance=ExtResource("13_b3802")]
 transform = Transform3D(-0.14439093, 0.36228615, -1.583603e-08, 0, -1.7047439e-08, -0.39, -0.36228615, -0.14439093, 6.3115273e-09, 0.01685235, 0.01, -0.00091663003)
 
 [node name="AuxScene5" parent="SimplePuzzle" instance=ExtResource("14_fevyy")]
-transform = Transform3D(-0.33545354, -0.19892438, 8.69526e-09, 0, -1.7047439e-08, -0.39, 0.19892438, -0.33545354, 1.4663139e-08, 0.018878745, 0.01, 0.08409425)
+transform = Transform3D(-0.33545354, -0.19892438, 8.6952605e-09, 0, -1.704744e-08, -0.39, 0.19892438, -0.33545354, 1.466314e-08, 0.018878745, 0.01, 0.08409425)
 
 [node name="AuxScene6" parent="SimplePuzzle" instance=ExtResource("15_hibaj")]
 transform = Transform3D(-0.03763051, -0.3881803, 1.6967897e-08, 0, -1.7047439e-08, -0.39, 0.3881803, -0.03763051, 1.6448817e-09, 0.10378343, 0.01, -0.00429672)

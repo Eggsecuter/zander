@@ -11,7 +11,7 @@ from solver.plotter import Plotter
 
 class Solver:
 	# overview of fields
-	def __init__(self, debug: bool):
+	def __init__(self, debug: bool = False):
 		self.debug = debug
 
 		self.image = None
