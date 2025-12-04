@@ -20,7 +20,7 @@ class Plotter:
 	def print_image(image, frame: PuzzleFrame, pieces: List[Piece], cursor: Vector2):
 		img_height, img_width = image.shape[:2]
 
-		img = np.zeros((img_height, img_width, 3), dtype=np.uint8)
+		img = np.full((img_height, img_width, 3), 255, dtype=np.uint8)
 
 		# Helper to convert percentile -> pixel coordinates (0–100 → image size)
 		def scale(vector: Vector2):
@@ -38,7 +38,7 @@ class Plotter:
 			scale(frame.bottomRight),
 			scale(frame.bottomLeft)
 		], np.int32)
-		cv2.drawContours(img, [frame_contour], -1, (0, 255, 255), 2)
+		cv2.drawContours(img, [frame_contour], -1, (60, 255, 60), 10)
 
 		for i, piece in enumerate(pieces):
 			placed_piece = PlacedPiece.get_from(piece)
@@ -51,36 +51,36 @@ class Plotter:
 			placed_contour = np.array([scale(p) for p in placed_piece.points], np.int32).reshape((-1, 1, 2))
 
 			# Draw original piece
-			cv2.drawContours(img, [original_contour], -1, (0, 0, 255), 1)
+			cv2.drawContours(img, [original_contour], -1, (0, 0, 255), 5)
 
 			for point in piece.points:
 				cv2.circle(img, (scale(point)), 5, (0, 0, 255), -1)
 
 			# Draw center of mass
 			cx, cy = scale(piece.center_of_mass)
-			cv2.circle(img, (cx, cy), 5, (0, 0, 255), -1)
-			cv2.putText(img, str(i), (cx, cy - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+			cv2.circle(img, (cx, cy), 10, (0, 0, 255), -1)
+			cv2.putText(img, str(i), (cx, cy - 15), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
 
 			# Draw edges
 			if hasattr(piece, "edges"):
 				for edge in piece.edges:
 					polyline_points = np.array([scale(point) for point in edge.points[:-1]], dtype=np.int32)
-					cv2.polylines(img, [polyline_points], isClosed=False, color=(255, 0, 0), thickness=2)
+					cv2.polylines(img, [polyline_points], isClosed=False, color=(255, 0, 0), thickness=5)
 					arrowed_line_points = [scale(point) for point in edge.points[-2:]]
-					cv2.arrowedLine(img, arrowed_line_points[0], arrowed_line_points[1], color=(255, 0, 0), thickness=2, tipLength=0.1)
+					cv2.arrowedLine(img, arrowed_line_points[0], arrowed_line_points[1], color=(255, 0, 0), thickness=5, tipLength=0.1)
 
 			# Draw placed piece
-			cv2.drawContours(img, [placed_contour], -1, (0, 255, 0), 1)
+			cv2.drawContours(img, [placed_contour], -1, (60, 255, 60), 5)
 			pcx, pcy = scale(placed_piece.center_of_mass)
-			cv2.circle(img, (pcx, pcy), 5, (0, 255, 0), -1)
+			cv2.circle(img, (pcx, pcy), 10, (60, 255, 60), -1)
 
 			# Draw placed piece edges
 			if hasattr(piece, "edges"):
 				for edge in placed_piece.edges:
 					polyline_points = np.array([scale(point) for point in edge.points[:-1]], dtype=np.int32)
-					cv2.polylines(img, [polyline_points], isClosed=False, color=(150, 0, 150), thickness=2)
+					cv2.polylines(img, [polyline_points], isClosed=False, color=(255, 60, 162), thickness=5)
 					arrowed_line_points = [scale(point) for point in edge.points[-2:]]
-					cv2.arrowedLine(img, arrowed_line_points[0], arrowed_line_points[1], color=(150, 0, 150), thickness=2, tipLength=0.1)
+					cv2.arrowedLine(img, arrowed_line_points[0], arrowed_line_points[1], color=(255, 60, 162), thickness=5, tipLength=0.1)
 
 		# Draw cursor
 		cx, cy = scale(cursor)
