@@ -1,0 +1,28 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+// TODO: Entwurfsentscheide auflisten.
+
+[[section-design-decisions]]
+== Architecture Decisions
+Python wurde als Programmiersprache gewählt, da im Team bereits fundierte Kenntnisse
+  vorhanden sind und Python eine schnelle Entwicklung sowie einfache Wartung ermöglicht.
+  Zudem ist Python auf dem Raspberry Pi gut unterstützt.
+* Die Bildverarbeitung basiert auf OpenCV, da diese Bibliothek ressourcenschonend arbeitet,
+  eine Vielzahl bewährter Algorithmen bereitstellt und für den Anwendungsfall ausreichend
+  genau ist. Der Einsatz neuronaler Netze (z. B. YOLO) wurde bewusst verworfen, da diese einen
+  höheren Rechenaufwand und eine komplexere Parametrisierung erfordern.
+* Die Puzzle-Lösungslogik ist als eigenständiger Solver umgesetzt und verwendet einen
+  Backtracking-Algorithmus. Dieser Ansatz erlaubt es, ungültige Teillösungen frühzeitig zu
+  verwerfen und reduziert die Rechenzeit im Vergleich zu einem Brute-Force-Verfahren
+  erheblich.
+* Die Software ist modular aufgebaut (Bildverarbeitung, Solver, Kommunikation), sodass
+  einzelne Komponenten unabhängig weiterentwickelt oder ausgetauscht werden können.
+* Für die Anbindung externer Clients und der Simulationsumgebung wird ein Client-Server-
+  Ansatz mit TCP-Sockets verwendet. Rechenintensive Aufgaben verbleiben vollständig im
+  Python-Server.
+* Zur Validierung der Logik vor dem physischen Einsatz wird eine Simulationsumgebung
+  (Godot) eingesetzt, die über TCP mit dem Python-System kommuniziert. Dies erleichtert
+  Debugging und Tests ohne Hardwareabhängigkeit.
+* Der höhere Ressourcenverbrauch von Python gegenüber kompilierten Sprachen wurde bewusst
+  in Kauf genommen, da die reduzierte Entwicklungszeit und bessere Wartbarkeit für das
+  Projekt wichtiger sind als maximale Laufzeiteffizienz.

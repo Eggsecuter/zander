@@ -1,0 +1,8 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+// TODO: Gewählter Lösungsansatz mit Begründung beschreiben. Gefragt ist eine sehr kurze Zusammenfassung.
+
+[[section-solution-strategy]]
+== Solution Strategy
+
+Der gewählte Lösungsansatz sieht eine modular aufgebaute Python-Software vor, welche die Bildverarbeitung, Entscheidungslogik und Kommunikation klar voneinander trennt. Mithilfe von OpenCV werden Puzzleteile erkannt und deren Lage bestimmt, während eine regelbasierte Logik die Puzzle-Lösung berechnet. Diese Struktur ermöglicht eine gute Wartbarkeit, einfache Erweiterbarkeit und gezielte Tests, insbesondere durch die Anbindung einer Simulationsumgebung.

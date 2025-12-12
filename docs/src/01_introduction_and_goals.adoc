@@ -1,0 +1,26 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+// TODO: Übersicht über die Problemstellung (Auftrag und Ziel).
+
+[[section-introduction-and-goals]]
+== Auftrag und Ziel
+
+Für das Projektmodul PREN soll eine Softwarelösung entwickelt werden, welches die autonome Lösung von Puzzles durch einen Roboterarm ermöglicht. Die Software soll in der Lage sein, Puzzleteile in einem Kamerabild zu erkennen, deren Position und Orientierung zu bestimmen und entsprechende Bewegungsbefehle an einen externen Robotercontroller zu senden. Ziel ist es, den gesamten Prozess von der Bilderfassung bis zur Bewegungssteuerung effizient und zuverlässig zu gestalten.
+
+=== Requirements Overview
+
+- Puzzleteile und Rahmen aus einem Kamerabild erkennen und in ein normiertes Koordinatensystem überführen.
+- Passende Reihenfolge sowie Pose (x/y und Rotation) jedes Puzzleteils bestimmen.
+- Bewegungsbefehle seriell an den Robotercontroller ausgeben.
+
+Weitere Requierements können aus dem Abschlussbericht entnommen werden.
+
+=== Stakeholders
+
+[options="header",cols="2*"]
+|===
+|Role/Name|Contact
+| Projektteam (IT) | Adrian Habeler; Bruno Milagre 
+| Projektteam (ET) | Jan Vogel; Luca Zemp
+| Coach | Martin Vogel
+|===

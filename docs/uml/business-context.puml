@@ -1,0 +1,20 @@
+@startuml
+left to right direction
+title Business Context
+
+actor "Bedienperson" as User
+cloud "Kamerasystem" as Camera
+
+node "Zander (Python)" as Z {
+  component "Solver"
+  component "Bildanalyse"
+}
+
+node "Embedded Steuerung" as Ctrl
+
+User --> Z : Start / Reset
+Z --> Camera : Bild anfordern
+Camera --> Z : Kamerabild
+Z --> Ctrl : Bewegungsbefehle
+
+@enduml

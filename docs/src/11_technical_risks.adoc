@@ -1,0 +1,9 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+// TODO: Listen Sie hier Entscheidungen zu Architektur, Design, Modularisierung, Implementation, und Testing auf, welche später zu
+// Problemen, Einschränkungen oder Mehraufwand in der Verwendung oder Weiterentwicklung der Umsetzung führen können.
+
+[[section-technical-risks]]
+== Risks and Technical Debts
+
+Die Technischen Risiken können im Abschlussbericht eingesehen werden.

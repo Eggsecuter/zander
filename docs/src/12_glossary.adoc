@@ -1,0 +1,51 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+[[section-glossary]]
+== Glossary
+
+[cols="e,2e" options="header"]
+|===
+|Term |Definition
+
+|PuzzleFrame
+|Rechteckiger Rahmen des Puzzles; wird aus der äußeren Kontur berechnet und dient als Zielkoordinatenraum.
+
+|Piece
+|Einzelnes Puzzleteil mit vereinfachtem Polygon, Schwerpunkt und berechneten Kanten.
+
+|Edge
+|Zusammenhängende Kante eines Puzzleteils (ein oder mehrere Segmente), die entlang des Rahmens platziert wird.
+
+|PlaceTransform
+|Translation (x/y) und Rotation, um ein Teil vom Bildkoordinatensystem in die Zielpose im Rahmen zu überführen.
+
+|Ready
+|UART-Nachricht des Roboters/Controllers, dass der Roboterarm bereit für den nächsten Befehl ist.
+
+|Reset
+|UART-Befehl, der den Roboterarm in die Grundstellung fährt; `start=true` für Beginn der Sequenz, `start=false` für Abschluss.
+
+|ClientHandler
+|Verantwortlich für die Kommunikation zwischen dem Zander Solver und externen Systemen (Roboter/Simulator).
+
+|ImageLoader
+|Lädt Bilddaten aus verschiedenen Quellen zur weiteren Verarbeitung.
+
+|PieceDetector
+|Identifiziert den Puzzlerahmen und einzelne Puzzleteile aus den verarbeiteten Bilddaten.
+
+|ShapeDetector
+|Erkennt Konturen und Formen innerhalb eines Bildes als ersten Schritt in der Bildverarbeitung.
+
+|Solver (Komponente)
+|Die Haupt-Orchestrierungskomponente des Zander-Systems, die die Pipeline zur Lösung des Puzzles verwaltet.
+
+|Matcher
+|Backtracking-Algorithmus, der die Reihenfolge und Pose der Puzzleteile bestimmt und Kollisionen prüft.
+
+|Percent-Koordinatensystem
+|Normierung der Bildkoordinaten auf 0–100 % (Ursprung unten links), um unabhängig von der Auflösung zu rechnen.
+
+|Robotercontroller
+|Externe Steuereinheit, die die Motorsteuerung des Roboters übernimmt und per UART mit dem Solver kommuniziert.
+|===

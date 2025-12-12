@@ -1,0 +1,21 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Level 1
+
+Person(user, "Bedienperson", "Startet und überwacht den Puzzle-Ablauf")
+
+System(zander, "Zander", "Zentrale Software für\nBildverarbeitung & Entscheidungslogik")
+
+System_Ext(camera, "Kamerasystem", "Liefert Bilder der Puzzle-Fläche")
+System_Ext(controller, "Externer Robotercontroller", "Führt Bewegungsbefehle aus")
+System_Ext(sim, "Godot", "Simulation für Tests")
+
+Rel(user, zander, "Start / Reset / Überwachung")
+Rel(zander, camera, "fordert Bilder an")
+Rel(camera, zander, "liefert Kamerabild")
+Rel(zander, controller, "sendet Bewegungsbefehle")
+Rel(controller, zander, "Status: ready / error")
+Rel(zander, sim, "Befehle / Status", "bidirektional")
+
+@enduml

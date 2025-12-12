@@ -1,0 +1,29 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Level 2
+
+Container_Boundary(c1, "Zander") {
+    Component(client_handler, "Client Handler", "Empfängt Bilddaten vom Roboter oder Simulator und sendet berechnete Bewegungsanweisungen zurück.")
+    Component(solver, "Solver", "Orchestriert den gesamten Puzzle-Lösungsprozess.")
+    Component(shape_detector, "Shape Detector", "Erkennt Konturen aller Puzzleteile und des Rahmens im Bild mit OpenCV.")
+    Component(piece_detector, "Piece Detector", "Klassifiziert erkannte Formen in Puzzle-Rahmen und einzelne Puzzleteile.")
+    Component(matcher, "Matcher", "Analysiert die Teile und findet die korrekte Platzierung und Rotation im Rahmen.")
+    Component(models, "Data Models", "Datenstrukturen für Puzzle, Teile, Transformationen und andere Entitäten.")
+}
+
+System_Ext(robot, "Roboter / Simulator", "Sendet Bilddaten, empfängt Bewegungsbefehle.")
+
+Rel(client_handler, solver, "startet")
+Rel(solver, shape_detector, "nutzt")
+Rel(solver, piece_detector, "nutzt")
+Rel(solver, matcher, "nutzt")
+
+Rel(shape_detector, models, "nutzt")
+Rel(piece_detector, models, "nutzt")
+Rel(matcher, models, "nutzt")
+
+Rel(client_handler, robot, "sendet Bewegungsbefehle an")
+Rel(robot, client_handler, "sendet Bilddaten an")
+
+@enduml

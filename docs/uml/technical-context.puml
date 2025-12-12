@@ -1,0 +1,46 @@
+@startuml
+skinparam linetype ortho
+skinparam ArrowFontSize 14
+skinparam defaultFontSize 14
+skinparam nodesep 80
+skinparam ranksep 80
+
+left to right direction
+title Technischer Kontext – Python Software
+
+actor "User\n(CLI/Controller)" as User
+node "Kamerasystem" as Cam
+node "Embedded Steuerung" as Emb
+node "Simulation\n(Godot)" as Sim
+
+package "Zander (Python)" {
+
+  component "Vision" as Vision
+  component "Logic"  as Logic
+  component "Comm"   as Comm
+
+  ' interne Verarbeitung (top → bottom)
+  Vision -down-> Logic : Teile erkannt
+  Logic  -down-> Comm  : Befehle
+
+  ' Layout-Stabilisierung
+  Vision -[hidden]-> Comm
+}
+
+' -------- externe Interaktionen --------
+Cam --> Vision : Bilder
+
+User --> Comm : Start / Stop
+
+Comm --> Emb : Befehle
+Emb --> Comm : Status
+
+Comm --> Sim : Befehle
+Sim --> Comm : Events
+
+' -------- Layout-Hints --------
+Cam  -[hidden]-> Vision
+Comm -[hidden]-> Emb
+Comm -[hidden]-> Sim
+
+@enduml

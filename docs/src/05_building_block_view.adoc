@@ -1,0 +1,35 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+[[section-building-block-view]]
+
+== Building Block View
+
+=== Level 1 (System Overview)
+
+image::05_level1.png[Business Context]
+
+Dieses Diagramm zeigt die Interaktion des Systems Zander mit seiner technischen Umgebung. Bilddaten werden vom Kamerasystem bezogen und intern verarbeitet, um Bewegungsbefehle zu berechnen. Diese Befehle werden an den externen Robotercontroller gesendet, welcher die physische Ausführung übernimmt und Statusmeldungen zurückliefert. Für Tests kann alternativ eine Simulationsumgebung angebunden werden. Die Bedienperson steuert den Ablauf über eine Benutzerschnittstelle.
+
+=== Level 2
+
+image::05_level2.png[Level 2: Zander Solver]
+
+Das Level-2-Diagramm zeigt die interne Architektur der Komponente "Zander Solver". Diese Komponente ist für die Analyse des Bildes und die Berechnung der Lösung des Puzzles verantwortlich. Sie besteht aus den folgenden Hauptkomponenten:
+
+Client Handler::
+Empfängt Bilddaten vom Roboter oder der Simulation und sendet die berechneten Bewegungsanweisungen zurück. Er dient als Schnittstelle zwischen dem Kern-Solver und der Aussenwelt.
+
+Solver::
+Orchestriert den gesamten Puzzle-Lösungsprozess. Er ruft die verschiedenen Sub-Komponenten in der richtigen Reihenfolge auf.
+
+Shape Detector::
+Der erste Schritt in der Bildverarbeitungspipeline. Diese Komponente verwendet OpenCV, um die Konturen aller Puzzleteile und des Rahmens im Bild zu erkennen.
+
+Piece Detector::
+Nimmt die von `Shape Detector` erkannten Formen entgegen und klassifiziert sie in den Puzzle-Rahmen und die einzelnen Puzzleteile.
+
+Matcher::
+Das Herzstück des Solvers. Diese Komponente enthält die Logik, um die einzelnen Teile zu analysieren und die korrekte Platzierung und Rotation innerhalb des Rahmens zu finden.
+
+Data Models::
+Eine Sammlung von Datenstrukturen, die zur Darstellung des Puzzles, der Teile, der Platzierungstransformationen und anderer wichtiger Entitäten im System verwendet werden.

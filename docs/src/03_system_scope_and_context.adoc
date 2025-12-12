@@ -1,0 +1,91 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+// TODO: Anhand von Datenflüssen beschreiben wie das zu entwickelnde System eingesetzt wird.
+// Also Daten, welche Benutzer oder umgebende Systeme in das zu entwickelnde System einspeisen oder abgreifen.
+// Diese Beschreibung wird oft von einem Diagramm unterstützt. Dieses Diagram ist in VSK Pflicht!
+// Hinweis: Hier unbedingt Benutzerschnittstellen und externe Schnittstellen mit Version spezifizieren.
+
+[[section-system-scope-and-context]]
+== System Scope and Context
+
+=== Business Context
+Die Python-Software stellt die fachliche Intelligenz des autonomen Puzzlesystems dar.
+Sie analysiert Bildinformationen der Puzzle-Fläche, berechnet eine gültige Puzzle-Lösung und steuert den fachlichen Ablauf der Platzierung einzelner Puzzleteile.
+
+Die Software trifft alle logischen Entscheidungen, während die physische Ausführung durch externe Systeme erfolgt.
+
+image::03_business_context.png[Business Context]
+
+[cols="1,1,3", options="header"]
+|===
+| Name | Typ | Fachliche Rolle
+
+| Bedienperson
+| Akteur
+| Startet den Puzzle-Lösungsprozess, überwacht den Systemzustand und greift bei Fehlern oder Tests manuell ein.
+
+| Zander (Python)
+| Fachsystem
+| Zentrale fachliche Intelligenz des Systems. Analysiert Bilddaten, berechnet die Puzzle-Lösung und steuert den logischen Ablauf der Platzierung.
+
+| Kamerasystem
+| Fachsystem
+| Liefert Bildinformationen der Puzzle-Fläche zur Erkennung von Position, Form und Orientierung der Puzzleteile.
+
+| Embedded Steuerung
+| Fachsystem
+| Führt die von der Python-Software berechneten Platzierungs- und Bewegungsanweisungen physisch aus.
+
+|===
+
+=== Technical Context
+
+Die Python-Software *Zander* ist die zentrale technische Steuereinheit des Systems.
+Sie verarbeitet Bilddaten aus dem Kamerasystem, leitet daraus Steuerbefehle ab und
+kommuniziert diese an die Embedded-Steuerung zur physischen Ausführung.
+
+Zusätzlich interagiert das System mit einer Simulationsumgebung, welche für Tests,
+Validierung und Entwicklung genutzt wird. Die Bedienperson steuert den Ablauf über
+eine lokale Benutzerschnittstelle.
+
+Die technische Verantwortung der Python-Software beschränkt sich auf
+Bildverarbeitung, Entscheidungslogik und Kommunikationskoordination.
+Zeitkritische Steuerung, Aktorik und Hardware-nahe Funktionen liegen ausserhalb
+des Software-Scopes.
+
+image::03_technical_context.png[Technical Context]
+
+[cols="1,1,2,3", options="header"]
+|===
+| Name | Typ | Schnittstelle | Technische Rolle
+
+| Bedienperson
+| Akteur
+| CLI / Controller
+| Startet und stoppt das System, wählt Betriebsmodi (Normalbetrieb, Test, Simulation).
+
+| Zander (Python)
+| Softwaresystem
+| Intern / Steuer-API
+| Zentrale Verarbeitungseinheit für Bildverarbeitung, Puzzle-Logik und Koordination
+der technischen Kommunikation.
+
+| Kamerasystem
+| Hardware-System
+| Kamera-Interface
+| Liefert Bilddaten der Puzzle-Fläche zur technischen Auswertung durch die
+Bildverarbeitung.
+
+| Embedded Steuerung
+| Embedded System
+| Steuer- und Statusschnittstelle
+| Führt Bewegungs-, Greif- und Platzierungsbefehle aus und meldet Status- und
+Fehlerzustände zurück.
+
+| Simulationsumgebung
+| Software-System
+| Simulationsschnittstelle
+| Stellt simulierte Sensordaten bereit und verarbeitet Steuerbefehle zur Validierung
+der Softwarelogik ohne physische Hardware.
+
+|===

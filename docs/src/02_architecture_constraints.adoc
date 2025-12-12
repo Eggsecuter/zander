@@ -1,0 +1,26 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+// TODO: Randbedingungen, welche bei der Lösung eingehalten werden müssen, z.B. bestehende Systeme, welche unterstützt werden müssen oder spezielle Anforderungen, welche den Lösungsraum einschränken. 
+
+[[section-architecture-constraints]]
+== Architecture Constraints
+
+=== Technologische Vorgaben
+
+==== Programmiersprache:
+Für die gesammte Lösung soll Python 3 verwendet werden, um eine breite Kompatibilität und einfache Wartbarkeit zu gewährleisten. Der Einsatz von zusätzlichen Bibliotheken ist erlaubt, sofern diese Open Source sind.
+
+==== Plattformabhängigkeit:
+Die Lösung soll auf einen Raspberry Pi lauffähig sein, um eine kostengünstige und flexible Hardwarebasis zu gewährleisten.
+
+=== Netzwerk- und Verfügbarkeitsanforderungen
+==== Netzwerkprotokolle:
+Die Kommunikation mit dem Robotiksteuerung soll über UART erfolgen, um eine zuverlässige und latenzarme Datenübertragung zu gewährleisten.
+
+===  Entwicklungsumgebung
+
+==== Quellcodeverwaltung:
+Der Quellcode wird in einem Git-Repository auf GitHub verwaltet, um Versionskontrolle und Zusammenarbeit zu erleichtern.
+
+==== Clean Code
+Es gelten die Prinzipien von Clean Code. Der Quellcode muss verständlich, wartbar und modular geschrieben sein.

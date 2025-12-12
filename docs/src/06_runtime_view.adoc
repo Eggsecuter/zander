@@ -1,0 +1,24 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+// TODO: Wo sinnvoll, Laufzeitsichten (z.B. mittels Sequenzdiagrammen und Beschreibung) von interessanten oder kritischen Abläufen dokumentieren. 
+
+[[section-runtime-view]]
+== Runtime View
+
+image::06_sequenzdiagramm.png[Sequenzdiagramm: Ablauf zum Lösen eines Puzzles]
+
+=== Puzzle lösen
+
+1. Ein TCP-Client verbindet sich mit dem Python-System (Zander) und sendet `camera={data}` mit einem Bild-Bytearray.
+2. Die Kommunikationsschicht (`ClientHandler`) des Python-Systems dekodiert die Nachricht und startet den Lösungsprozess über `Solver.run()`.
+3. Die Bildverarbeitung (`ImageLoader`, Detektoren) bereinigt das Bild, extrahiert Kanten und erkennt Puzzle-Rahmen sowie einzelne Teile.
+4. Der `Matcher` berechnet die Einsetzreihenfolge und Pose (Position/Rotation) aller Teile.
+5. Das Python-System sendet über die UART-Schnittstelle den Befehl `reset` an den **externen Robotercontroller**, um diesen in die Grundstellung zu bringen.
+6. Der externe Robotercontroller bestätigt jede Aktion mit `ready`.
+7. Für jedes Puzzleteil sendet das Python-System sequenziell:
+   a) `move` zur Zielposition  
+   b) `pick` zum Greifen  
+   c) `move` zur Zielablage  
+   d) `place` zum Ablegen  
+   jeweils bestätigt durch `ready`.
+8. Nach Abarbeitung aller Teile sendet das Python-System `finish`; der Ablauf ist abgeschlossen.

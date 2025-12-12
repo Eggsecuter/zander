@@ -1,0 +1,88 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+// TODO: Beschreibung (als Auflistung) der Umsetzung von bekannten und relevanten «nicht funktionalen»-Anforderungen an das zu entwickelnde System.
+//
+// Beispiele:
+// - Wie garantieren Sie das Ihr System die Antwort (Reply) zu einer Anforderung (Request) innerhalb von maximal 100ms versendet?
+// - Wie garantieren Sie, dass Ihr System eine Verfügbarkeit von 99.9% hat?
+// - Wie garantieren Sie das Nachrichten, welche vom System, erhalten werden nicht verloren gehen?
+// - usw.
+
+[[section-quality-scenarios]]
+== Qualitätsanforderungen
+
+=== Verfügbarkeit
+
+* Das Python-System ist während des Betriebs dauerhaft lauffähig und verarbeitet
+  eingehende TCP-Nachrichten sequentiell.
+
+  Sollte die TCP-Verbindung unterbrochen werden, bleibt der Server aktiv und kann
+  neue Verbindungen annehmen, ohne neu gestartet werden zu müssen.
+
+* Kurzzeitige Unterbrechungen der Kommunikation führen nicht zum Verlust des
+  Systemzustands.
+
+  Laufende Berechnungen werden kontrolliert abgebrochen, sodass der Ablauf durch
+  erneutes Senden eines Bildes neu gestartet werden kann.
+
+=== Performance-Anforderungen
+
+* Die Puzzle-Lösungslogik berechnet die Platzierung aller Teile innerhalb einer
+  für den Anwendungsfall akzeptablen Zeit.
+
+  Durch den Einsatz eines Backtracking-Algorithmus werden ungültige Teillösungen
+  frühzeitig verworfen und die Rechenzeit reduziert.
+
+* Rechenintensive Aufgaben (Bildverarbeitung, Solver) werden ausschließlich im
+  Python-Server ausgeführt.
+
+  Dadurch bleibt die Kommunikation mit externen Systemen schlank und blockiert
+  nicht durch lange Berechnungen.
+
+
+=== Robustheit und Fehlertoleranz
+
+* Ungültige oder fehlerhafte Eingaben (z. B. beschädigte Bilddaten oder ungültige
+  Nachrichtenformate) führen nicht zum Absturz des Systems.
+
+  Solche Eingaben werden verworfen und entsprechend protokolliert.
+
+* Bei Abbruch der TCP-Verbindung werden offene Abläufe kontrolliert beendet.
+
+  Das System kann anschließend ohne Neustart weiterverwendet werden.
+
+=== Wartbarkeit und Erweiterbarkeit
+
+* Die Python-Software ist modular aufgebaut (Kommunikation, Bildverarbeitung,
+  Solver), sodass einzelne Komponenten unabhängig angepasst werden können.
+
+  Dies erleichtert Refactoring und die Erweiterung um neue Algorithmen.
+
+* Änderungen an der Bildverarbeitung oder am Solver erfordern keine Anpassungen
+  der Kommunikationsschnittstelle.
+
+  Dadurch bleibt die Architektur stabil bei funktionalen Erweiterungen.
+
+=== Testbarkeit
+
+* Die Python-Logik kann unabhängig von der Hardware getestet werden.
+
+  Durch den Client-Server-Ansatz lassen sich Bilddaten und Nachrichten simulieren.
+
+* Eine Simulationsumgebung (z. B. Godot) ermöglicht die Validierung von Abläufen,
+  ohne dass physische Komponenten benötigt werden.
+
+=== Portabilität
+
+* Die Python-Software ist plattformunabhängig und auf Linux-Systemen lauffähig.
+
+  Die Zielplattform (Raspberry Pi) wird vollständig unterstützt, ohne
+  systemspezifische Anpassungen im Code.
+
+=== Ressourceneffizienz
+
+* Der erhöhte Ressourcenbedarf von Python wird bewusst in Kauf genommen.
+
+  Im Gegenzug profitieren Entwicklung, Wartbarkeit und Verständlichkeit der
+  Software, was für den Projektkontext wichtiger ist als maximale Laufzeit-
+  Optimierung.

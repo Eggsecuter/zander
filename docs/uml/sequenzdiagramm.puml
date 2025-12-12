@@ -1,0 +1,38 @@
+@startuml
+skinparam linetype ortho
+title "Sequenzdiagramm"
+
+actor Client
+participant "ClientHandler" as Handler
+participant "Solver" as Solver
+participant "ImageLoader" as Loader
+participant "PieceDetector" as Detectors
+participant "Matcher" as Matcher
+participant "Robotercontroller" as Ctrl
+
+autonumber
+
+group Bild übernehmen
+  Client -> Handler : camera={data}
+  Handler -> Solver : run()
+  Solver -> Loader : load()
+  Loader --> Solver : bereinigtes Bild
+  Solver -> Detectors : detect shapes/contours
+  Detectors --> Solver : Rahmen + Teile
+end
+
+group Posen berechnen
+  Solver -> Matcher : solve(pieces, frame)
+  Matcher --> Solver : Posen/Bewegungen
+end
+
+group Bewegungen ausführen
+  Handler -> Ctrl : reset(start=true)
+  Ctrl --> Handler : ready
+  loop pro Teil
+    Handler -> Ctrl : move/pick/place
+    Ctrl --> Handler : ready
+  end
+  Handler -> Ctrl : reset(start=false)
+end
+@enduml
