@@ -33,7 +33,7 @@ ifndef::imagesdir[:imagesdir: ../images]
   Durch den Einsatz eines Backtracking-Algorithmus werden ungültige Teillösungen
   frühzeitig verworfen und die Rechenzeit reduziert.
 
-* Rechenintensive Aufgaben (Bildverarbeitung, Solver) werden ausschließlich im
+* Rechenintensive Aufgaben (Bildverarbeitung, Solver) werden ausschliesslich im
   Python-Server ausgeführt.
 
   Dadurch bleibt die Kommunikation mit externen Systemen schlank und blockiert
@@ -49,7 +49,7 @@ ifndef::imagesdir[:imagesdir: ../images]
 
 * Bei Abbruch der TCP-Verbindung werden offene Abläufe kontrolliert beendet.
 
-  Das System kann anschließend ohne Neustart weiterverwendet werden.
+  Das System kann anschliessend ohne Neustart weiterverwendet werden.
 
 === Wartbarkeit und Erweiterbarkeit
 

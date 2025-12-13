@@ -6,10 +6,10 @@
 // configure EN settings for asciidoc
 include::src/config.adoc[]
 
-= image:arc42-logo.png[arc42] Template
+= image:arc42-logo.png[arc42] Zander
 :revnumber: 8.2 EN
 :revdate: January 2023
-:revremark: (based upon AsciiDoc version)
+:revremark:  (based upon AsciiDoc version)
 // toc-title definition MUST follow document title without blank line!
 :toc-title: Table of Contents
 
@@ -27,9 +27,6 @@ ifdef::backend-html5[]
 </style>
 ++++
 endif::backend-html5[]
-
-
-include::src/about-arc42.adoc[]
 
 // horizontal line
 ***

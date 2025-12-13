@@ -8,7 +8,7 @@ ifndef::imagesdir[:imagesdir: ../images]
 |Term |Definition
 
 |PuzzleFrame
-|Rechteckiger Rahmen des Puzzles; wird aus der äußeren Kontur berechnet und dient als Zielkoordinatenraum.
+|Rechteckiger Rahmen des Puzzles; wird aus der äusseren Kontur berechnet und dient als Zielkoordinatenraum.
 
 |Piece
 |Einzelnes Puzzleteil mit vereinfachtem Polygon, Schwerpunkt und berechneten Kanten.
