@@ -1,8 +1,8 @@
-from typing import Any
-
 import cv2
 import numpy as np
 import cv2.aruco as aruco
+
+from services.camera import CameraService
 
 DICT = aruco.DICT_4X4_50
 GROUP_A = [0, 1, 2, 3, 0]
@@ -38,31 +38,27 @@ def draw_workspace_paths(display, corners, ids):
 
 	return display
 
-def detect_from_camera(camera_index: int = 0) -> int:
-	cap = cv2.VideoCapture(camera_index)
-	if not cap.isOpened():
-		raise RuntimeError(f"Could not open camera {camera_index}")
-
+def detect_markers_from_camera(camera_index: int = 0) -> int:
 	aruco_dict = aruco.getPredefinedDictionary(DICT)
 	params = aruco.DetectorParameters()
 
-	while True:
-		ret, frame = cap.read()
-		if not ret:
-			break
+	with CameraService(camera_index) as cam:
+		while True:
+			ret, frame = cam.read()
+			if not ret:
+				break
 
-		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-		corners, ids, _ = aruco.detectMarkers(gray, aruco_dict, parameters=params)
+			gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+			corners, ids, _ = aruco.detectMarkers(gray, aruco_dict, parameters=params)
 
-		display = frame.copy()
-		if ids is not None and len(ids) > 0:
-			display = aruco.drawDetectedMarkers(display, corners, ids)
-			display = draw_workspace_paths(display, corners, ids)
+			display = frame.copy()
+			if ids is not None and len(ids) > 0:
+				display = aruco.drawDetectedMarkers(display, corners, ids)
+				display = draw_workspace_paths(display, corners, ids)
 
-		cv2.imshow("Aruco Detect", display)
-		if cv2.waitKey(1) & 0xFF == ord("q"):
-			break
+			cv2.imshow("Aruco Detect", display)
+			if cv2.waitKey(1) & 0xFF == ord("q"):
+				break
 
-	cap.release()
 	cv2.destroyAllWindows()
 	return 0
