@@ -1,7 +1,7 @@
 import argparse
 
 from calibrate.aruco_generator import generate_markers
-from calibrate.aruco_detector import detect_from_camera
+from calibrate.aruco_detector import detect_markers_from_camera
 from calibrate.camera_calibration import take_photos_from_camera, calibrate_from_photos
 
 def main() -> int:
@@ -19,7 +19,7 @@ def main() -> int:
 		return generate_markers()
 
 	if args.command == "detect":
-		return detect_from_camera()
+		return detect_markers_from_camera()
 
 	if args.command == "take-photos":
 		return take_photos_from_camera()
