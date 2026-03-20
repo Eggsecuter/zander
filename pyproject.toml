@@ -1,6 +1,3 @@
-[tool.uv]
-system-site-packages = true
-
 [project]
 name = "zander"
 version = "0.1.0"
