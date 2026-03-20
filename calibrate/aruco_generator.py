@@ -5,7 +5,7 @@ import cv2.aruco as aruco
 OUT_DIR = Path("data/calibration/markers")
 DICT = aruco.DICT_4X4_50
 COUNT = 8
-SIZE_PX = 500
+SIZE_PX = 80
 BORDER_BITS = 1
 
 def generate_markers() -> int:
