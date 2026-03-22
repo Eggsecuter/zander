@@ -36,17 +36,12 @@ def take_photos_from_camera(
         while frame_count < max_photos:
             _, frame = cam.read()
             curr_time = time.time()
-            cv2.imshow("Calibration Photos", frame)
             if curr_time - last_recorded_time >= interval:
                 path = output_dir / f"frame_{frame_count:03d}.png"
                 cv2.imwrite(str(path), frame)
                 print(f"  [{frame_count + 1}/{max_photos}] Saved {path}")
                 last_recorded_time = curr_time
                 frame_count += 1
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
-
-    cv2.destroyAllWindows()
     print(f"Done. {frame_count} photos saved.")
     return 0
 
@@ -80,12 +75,7 @@ def calibrate_from_photos(photos_dir: Path = PHOTOS_DIR, output_dir: Path = OUTP
         corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), CRITERIA)
         imgpoints.append(corners2)
 
-        img = cv2.drawChessboardCorners(img, GRID, corners2, ret)
-        cv2.imshow("Calibration", img)
-        cv2.waitKey(100)
         print(f"  Detected: {fname}")
-
-    cv2.destroyAllWindows()
 
     if len(objpoints) < 5:
         print(f"Not enough valid images ({len(objpoints)}). Need at least 5.")
