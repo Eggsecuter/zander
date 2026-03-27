@@ -10,7 +10,7 @@ GROUP_B = [4, 5, 7, 6, 4]
 
 def build_centers_by_id(corners, ids):
 	centers = {}
-	for marker_corners, marker_id in zip[tuple](corners, ids.flatten()):
+	for marker_corners, marker_id in zip(corners, ids.flatten()):
 		pts = marker_corners.reshape(4, 2)
 		center = pts.mean(axis=0).astype(int)
 		centers[int(marker_id)] = (int(center[0]), int(center[1]))
