@@ -37,13 +37,27 @@ LensPosition = 1 / 0.12 ≈ 8.3
 
 > **Wichtig:** Der Wert muss identisch für Kalibrierung und Betrieb sein. Nur so stimmen die intrinsischen Parameter der `camera.yml` mit der tatsächlichen Aufnahmesituation überein.
 
+### Parameter
+
+| Parameter | Standard | Beschreibung |
+|---|---|---|
+| `index` | `0` | Kamera-Index (nur cv2-Fallback) |
+| `output_size` | `(1920, 1080)` | Ausgabeauflösung |
+| `square_crop` | `False` | Quadratischen Mittelschnitt aktivieren |
+| `lock_focus` | `True` | Autofokus fixieren (nur Picamera2) |
+
 ### Verwendung
 
 Immer als Context Manager — die Kamera wird automatisch freigegeben, auch bei Fehlern:
 
 ```python
+# Standard
 with CameraService() as cam:
     ret, frame = cam.read()  # gleiche Signatur wie cv2.VideoCapture.read()
+
+# Quadratischer Crop (z.B. 1080×1080)
+with CameraService(output_size=(1920, 1080), square_crop=True) as cam:
+    ret, frame = cam.read()  # → (1080, 1080, 3)
 ```
 
 ### Installation auf dem Raspberry Pi
@@ -145,4 +159,4 @@ cv_file.release()
 
 ## Offene TODOs
 
-- [ ] `LensPosition` in `services/camera.py` von `0.0` auf `8.3` setzen (= 12 cm Montagehöhe)
+- [x] `LensPosition` auf `8.3` gesetzt (= 12 cm Montagehöhe)
