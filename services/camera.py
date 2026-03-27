@@ -7,7 +7,7 @@ class CameraService:
     falls back to cv2.VideoCapture for local development.
     """
 
-    def __init__(self, index: int = 0, output_size: tuple[int, int] = (1920, 1920)):
+    def __init__(self, index: int = 0, output_size: tuple[int, int] = (1920, 1080)):
         self._index = index
         self._output_size = output_size
         self._cam = None
