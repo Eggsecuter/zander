@@ -39,7 +39,8 @@ class UartHandler:
 			return
 
 		if self.messages == None:
-			self.solve()
+			if not self.solve():
+				return
 
 		message = self.messages.pop(0)
 		self.send(message)
@@ -65,7 +66,7 @@ class UartHandler:
 		print(f"Sending {message}")
 		self.stream.write(message.encode('utf-8'))
 
-	def solve(self):
+	def solve(self) -> bool:
 		solver = Solver()
 
 		# TODO capture image from pi cam
@@ -75,7 +76,7 @@ class UartHandler:
 
 		if len(pieces) <= 0:
 			self.on_error()
-			return
+			return False
 
 		# create message list
 		self.messages = ["reset\n"]
@@ -87,6 +88,8 @@ class UartHandler:
 			self.messages.append(f"place\n")
 
 		self.messages.append("finish\n")
+
+		return True
 
 	def encode_float(self, value: float) -> str:
 		# in micrometers
