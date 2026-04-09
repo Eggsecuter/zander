@@ -8,6 +8,16 @@ from solver.utility.angle import Angle
 
 class PolygonUtility:
 	@staticmethod
+	def get_width(points: List[Vector2]) -> float:
+		x_values = [v.x for v in points]
+		return max(x_values) - min(x_values)
+
+	@staticmethod
+	def get_height(points: List[Vector2]) -> float:
+		y_values = [v.y for v in points]
+		return max(y_values) - min(y_values)
+
+	@staticmethod
 	def roughen(points: List[Vector2], epsilon) -> List[Vector2]:
 		'''
 		Roughen shape to reduce points and improve further calculation performance.
@@ -141,7 +151,7 @@ class PolygonUtility:
 				current_combined_edge = None
 
 		# filter marked edges which got combined into an other
-		edges = [edge for index, edge in enumerate(edges) if index not in removal_edge_indices]
+		# edges = [edge for index, edge in enumerate(edges) if index not in removal_edge_indices]
 
 		edges.sort(key=lambda edge: edge.get_length(), reverse=True)
 

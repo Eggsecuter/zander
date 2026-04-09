@@ -184,12 +184,10 @@ class Matcher:
 		translation = frame_center_of_mass - relative_frame_center_of_mass
 
 		# calculate relative frame orientation (can only be 0 or 90 degrees)
-		x_values = [v.x for v in self.cursor_history]
-		y_values = [v.y for v in self.cursor_history]
-		x_length = max(x_values) - min(x_values)
-		y_length = max(y_values) - min(y_values)
+		relative_frame_width = PolygonUtility.get_width(self.cursor_history)
+		relative_frame_height = PolygonUtility.get_height(self.cursor_history)
 
-		rotation = math.pi / 2 if x_length > y_length else 0
+		rotation = math.pi / 2 if relative_frame_width > relative_frame_height else 0
 
 		for piece in self.pieces:
 			# 1. rotate around cursor center
