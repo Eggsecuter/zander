@@ -26,8 +26,3 @@ uv add --group dev <package>
 ```bash
 uv run python -m solver
 ```
-
-## TODOs PREN2
-- Also rotate into frame (currently only transpose)
-- Edges can be matched with 90 degrees as well (if there are no corners)
-- Try with different values (roughening, ...)

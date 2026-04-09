@@ -183,5 +183,18 @@ class Matcher:
 
 		translation = frame_center_of_mass - relative_frame_center_of_mass
 
+		# calculate relative frame orientation (can only be 0 or 90 degrees)
+		x_values = [v.x for v in self.cursor_history]
+		y_values = [v.y for v in self.cursor_history]
+		x_length = max(x_values) - min(x_values)
+		y_length = max(y_values) - min(y_values)
+
+		rotation = math.pi / 2 if x_length > y_length else 0
+
 		for piece in self.pieces:
+			# 1. rotate around cursor center
+			piece.place_transform.position = piece.place_transform.position.rotate_around(relative_frame_center_of_mass, rotation)
+			piece.place_transform.rotation_radiant += rotation
+
+			# 2. translate to frame
 			piece.place_transform.position += translation
