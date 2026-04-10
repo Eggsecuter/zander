@@ -44,6 +44,7 @@ LensPosition = 1 / 0.12 ≈ 8.3
 | `index` | `0` | Kamera-Index (nur cv2-Fallback) |
 | `output_size` | `(1920, 1080)` | Ausgabeauflösung |
 | `square_crop` | `False` | Quadratischen Mittelschnitt aktivieren |
+| `picamera_rgb_buffer` | `True` | Nach `capture_array()` von RGB→BGR wandeln (Picamera2 liefert oft RGB-Reihenfolge; sonst wirken Hauttöne bläulich) |
 | `lock_focus` | `True` | Autofokus fixieren (nur Picamera2) |
 
 ### Verwendung

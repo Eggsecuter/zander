@@ -1,5 +1,7 @@
 import numpy as np
 
+import cv2
+
 
 class CameraService:
     """
@@ -7,10 +9,18 @@ class CameraService:
     falls back to cv2.VideoCapture for local development.
     """
 
-    def __init__(self, index: int = 0, output_size: tuple[int, int] = (1920, 1080), square_crop: bool = False):
+    def __init__(
+        self,
+        index: int = 0,
+        output_size: tuple[int, int] = (1920, 1080),
+        square_crop: bool = False,
+        *,
+        picamera_rgb_buffer: bool = True,
+    ):
         self._index = index
         self._output_size = output_size
         self._square_crop = square_crop
+        self._picamera_rgb_buffer = picamera_rgb_buffer
         self._cam = None
         self._fallback = False
 
@@ -44,7 +54,6 @@ class CameraService:
             self._fallback = False
 
         except (ImportError, Exception):
-            import cv2
             self._cam = cv2.VideoCapture(self._index)
             if not self._cam.isOpened():
                 raise RuntimeError(f"Could not open camera {self._index}")
@@ -57,6 +66,9 @@ class CameraService:
         else:
             frame = self._cam.capture_array()
             ok = True
+            # Trotz "BGR888" liefert Picamera2 oft RGB-Reihenfolge → Haut wirkt bläulich in OpenCV (BGR).
+            if self._picamera_rgb_buffer:
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
         if ok and self._square_crop:
             frame = self._crop_square(frame)
