@@ -127,8 +127,19 @@ Ablauf:
 3. Bilder ohne Erkennung werden automatisch übersprungen
 4. Berechnet Kameraparameter mit **Rational Model** (`cv2.CALIB_RATIONAL_MODEL`) — 8 Distortion-Koeffizienten statt 5, besser geeignet für das 102° Weitwinkelobjektiv des Pi Camera Module 3 Wide/NoIR
 5. Speichert undistorted Bilder nach `data/calibration/undistorted/`
-6. Schreibt `camera.yml` mit `new_matrix` und `distortion_coef`
+6. Schreibt `camera.yml` mit `matrix`, `new_matrix`, `distortion_coef` und `calibration_size`
 7. Gibt den Re-Projection Error aus
+
+### Live-Erkennung (`detect`)
+
+`uv run python -m calibrate detect` lädt `camera.yml` (falls vorhanden) und **entzerrt** jedes Bild vor der ArUco-Erkennung (`undistort`), damit die Kalibrierung wirksam wird.
+
+```bash
+uv run python -m calibrate detect --no-calibration    # ohne Entzerrung testen
+uv run python -m calibrate detect --calibration /pfad/zur/camera.yml
+```
+
+**Hinweis:** Ältere `camera.yml` ohne Eintrag `matrix` müssen einmal neu mit `calibrate` erzeugt werden.
 
 ### Re-Projection Error
 
@@ -144,13 +155,16 @@ Ablauf:
 
 Gespeichert im OpenCV YAML-Format. Enthält:
 
-- `new_matrix` — optimierte Kameramatrix (3×3)
+- `matrix` — originale Kameramatrix aus `calibrateCamera` (3×3), nötig für `undistort`
+- `new_matrix` — optimierte Matrix nach `getOptimalNewCameraMatrix`
 - `distortion_coef` — Distortion-Koeffizienten (1×8, Rational Model)
+- `calibration_size` — Bildgröße `(Breite, Höhe)` der Kalibrierfotos (für Skalierung bei anderer Live-Auflösung)
 
 ### Laden für Pose-Estimation
 
 ```python
 cv_file = cv2.FileStorage("camera.yml", cv2.FILE_STORAGE_READ)
+mtx = cv_file.getNode("matrix").mat()
 new_matrix = cv_file.getNode("new_matrix").mat()
 dist_coef  = cv_file.getNode("distortion_coef").mat()
 cv_file.release()

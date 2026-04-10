@@ -82,8 +82,9 @@ def calibrate_from_photos(photos_dir: Path = PHOTOS_DIR, output_dir: Path = OUTP
         return 1
 
     print(f"\nCalibrating with {len(objpoints)} images...")
+    calib_w, calib_h = gray.shape[::-1]
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
-        objpoints, imgpoints, gray.shape[::-1], None, None,
+        objpoints, imgpoints, (calib_w, calib_h), None, None,
         flags=cv2.CALIB_RATIONAL_MODEL,
     )
 
@@ -92,14 +93,17 @@ def calibrate_from_photos(photos_dir: Path = PHOTOS_DIR, output_dir: Path = OUTP
         img = cv2.imread(fname)
         h, w = img.shape[:2]
         new_mtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-        dst = cv2.undistort(img, new_mtx, dist, None, new_mtx)
+        dst = cv2.undistort(img, mtx, dist, None, new_mtx)
         out_path = output_dir / f"{i:03d}.png"
         cv2.imwrite(str(out_path), dst)
 
-    # Save camera matrix and distortion coefficients
+    # Save intrinsics (matrix + dist required for live undistort; new_matrix for compatibility)
+    new_mtx, _roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (calib_w, calib_h), 1, (calib_w, calib_h))
     cv_file = cv2.FileStorage(str(calibration_file), cv2.FILE_STORAGE_WRITE)
+    cv_file.write("matrix", mtx)
     cv_file.write("new_matrix", new_mtx)
     cv_file.write("distortion_coef", dist)
+    cv_file.write("calibration_size", np.array([[calib_w, calib_h]], dtype=np.int32))
     cv_file.release()
 
     # Re-projection error

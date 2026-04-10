@@ -1,7 +1,10 @@
+from pathlib import Path
+
 import cv2
 import numpy as np
 import cv2.aruco as aruco
 
+from calibrate.camera_params import load_camera_calibration, undistort_bgr_frame
 from services.camera import CameraService
 
 DICT = aruco.DICT_4X4_50
@@ -53,8 +56,18 @@ def detect_markers_from_camera(
     camera_index: int = 0,
     output_size: tuple[int, int] = (1920, 1080),
     square_crop: bool = False,
+    calibration_file: Path | None = Path("camera.yml"),
+    use_calibration: bool = True,
 ) -> int:
-    """Live ArUco detection. Frames are BGR (OpenCV); use cv2.imshow as-is."""
+    """Live ArUco detection. Loads camera.yml for lens undistortion when present."""
+    calib = None
+    if use_calibration and calibration_file is not None:
+        calib = load_camera_calibration(calibration_file)
+        if calib is not None:
+            print(f"Using lens calibration from '{calibration_file}'")
+        else:
+            print(f"No valid calibration at '{calibration_file}' — running without undistort")
+
     aruco_dict = aruco.getPredefinedDictionary(DICT)
     params = aruco.DetectorParameters()
 
@@ -67,6 +80,10 @@ def detect_markers_from_camera(
             ret, frame = cam.read()
             if not ret:
                 break
+
+            if calib is not None:
+                mtx, dist, calib_wh = calib
+                frame = undistort_bgr_frame(frame, mtx, dist, calib_wh)
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             corners, ids, _ = aruco.detectMarkers(gray, aruco_dict, parameters=params)
