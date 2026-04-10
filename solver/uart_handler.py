@@ -36,6 +36,7 @@ class UartHandler:
 
 	def on_ready(self):
 		if self.messages != None and len(self.messages) <= 0:
+			self.messages = None
 			return
 
 		if self.messages == None:
