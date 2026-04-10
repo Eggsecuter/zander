@@ -8,7 +8,7 @@ class UartHandler:
 	messages: List[str] = None
 
 	def __init__(self, port: str):
-		self.stream = Serial(port, 9600)
+		self.stream = Serial(port, 115200)
 
 		# wait for initial ready (calibration finished)
 		self.listen()
