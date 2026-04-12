@@ -3,11 +3,8 @@ import numpy as np
 
 from typing import List, Tuple
 from solver.models.piece import Piece
-from solver.models.puzzle_frame import PuzzleFrame
 from solver.models.vector2 import Vector2
 from solver.utility.polygon import PolygonUtility
-
-FRAME_WIDTH_PERCENTAGE = 30
 
 ROUGHENING_EPSILON: float = 0.05
 EDGE_LINE_EPSILON: float = 0.1
@@ -17,29 +14,24 @@ EDGE_CORNER_MARGIN_DEGREES: float = 10.0
 
 class PieceDetector:
 	@staticmethod
-	def detect(image) -> Tuple[PuzzleFrame, List[Piece]]:
-		contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-		frame: PuzzleFrame = None
+	def detect(image) -> List[Piece]:
 		pieces: List[Piece] = []
+		contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
 		for contour in contours:
 			coordinates = contour.reshape(-1, 2)
 			vectors = [PieceDetector.normalize_coordinate(image, coordinate[0], coordinate[1]) for coordinate in coordinates]
 
-			# frame
-			if any(vector.x < FRAME_WIDTH_PERCENTAGE for vector in vectors):
-				frame = PieceDetector.get_frame(vectors)
-			# piece
-			else:
-				points = PolygonUtility.roughen(vectors, ROUGHENING_EPSILON)
-				center_of_mass = PolygonUtility.calculate_center_of_mass(points)
-				edges = PolygonUtility.detect_edges(points, EDGE_LINE_EPSILON, EDGE_MIN_LENGTH, EDGE_CORNER_MARGIN, EDGE_CORNER_MARGIN_DEGREES)
+			# TODO disregard points out of bounding box (crop camera image to A4 place)
+			# TODO account for puzzle height (homography)
+			points = PolygonUtility.roughen(vectors, ROUGHENING_EPSILON)
+			center_of_mass = PolygonUtility.calculate_center_of_mass(points)
+			edges = PolygonUtility.detect_edges(points, EDGE_LINE_EPSILON, EDGE_MIN_LENGTH, EDGE_CORNER_MARGIN, EDGE_CORNER_MARGIN_DEGREES)
 
-				piece = Piece(points, center_of_mass, edges)
-				pieces.append(piece)
+			piece = Piece(points, center_of_mass, edges)
+			pieces.append(piece)
 
-		return frame, pieces
+		return pieces
 
 	@staticmethod
 	def normalize_coordinate(image, x: float, y: float):
@@ -62,25 +54,3 @@ class PieceDetector:
 		y *= 100 / longer_dimension
 
 		return Vector2(float(x), float(y))
-
-	@staticmethod
-	def get_frame(points: List[Vector2]) -> PuzzleFrame:
-		points = np.array([[p.x, p.y] for p in points], dtype=np.float32)
-
-		rectangle = cv2.minAreaRect(points)
-		box = cv2.boxPoints(rectangle)
-
-		s = box.sum(axis=1)
-		diff = np.diff(box, axis=1)
-
-		topLeft = box[np.argmax(diff)]
-		bottomRight = box[np.argmin(diff)]
-		topRight = box[np.argmax(s)]
-		bottomLeft = box[np.argmin(s)]
-
-		return PuzzleFrame(
-			topLeft=Vector2(float(topLeft[0]), float(topLeft[1])),
-			topRight=Vector2(float(topRight[0]), float(topRight[1])),
-			bottomRight=Vector2(float(bottomRight[0]), float(bottomRight[1])),
-			bottomLeft=Vector2(float(bottomLeft[0]), float(bottomLeft[1]))
-		)

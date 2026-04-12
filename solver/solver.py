@@ -2,6 +2,7 @@ import time
 from typing import List
 from solver.models.piece import Piece
 from solver.models.puzzle_frame import PuzzleFrame
+from solver.models.vector2 import Vector2
 from solver.pipeline.image_loader import ImageLoader
 from solver.pipeline.matcher import Matcher
 from solver.pipeline.piece_detector import PieceDetector
@@ -29,9 +30,17 @@ class Solver:
 			print('No image loaded!')
 			return
 
+		# TODO define real life coordinates
+		self.frame =PuzzleFrame(
+			topLeft=Vector2(0.0, 0.0),
+			topRight=Vector2(40.0, 0.0),
+			bottomRight=Vector2(40.0, 70.0),
+			bottomLeft=Vector2(0.0, 70.0)
+		)
+
 		# TODO try over and over again with different margin values (for each method in the whole algorithm) until it finds an optimal solution
 		self.image = ShapeDetector.detect(self.image)
-		self.frame, self.pieces = PieceDetector.detect(self.image)
+		self.pieces = PieceDetector.detect(self.image)
 
 		start_time = time.time()
 		matcher = Matcher(self.image, self.frame, self.pieces)

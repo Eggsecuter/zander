@@ -32,13 +32,14 @@ class Plotter:
 			return x, image.shape[0] - y
 
 		# Draw frame
-		frame_contour = np.array([
-			scale(frame.topLeft),
-			scale(frame.topRight),
-			scale(frame.bottomRight),
-			scale(frame.bottomLeft)
-		], np.int32)
-		cv2.drawContours(img, [frame_contour], -1, (60, 255, 60), 10)
+		if frame != None:
+			frame_contour = np.array([
+				scale(frame.topLeft),
+				scale(frame.topRight),
+				scale(frame.bottomRight),
+				scale(frame.bottomLeft)
+			], np.int32)
+			cv2.drawContours(img, [frame_contour], -1, (60, 255, 60), 10)
 
 		for i, piece in enumerate(pieces):
 			placed_piece = PlacedPiece.get_from(piece)
@@ -82,9 +83,10 @@ class Plotter:
 					arrowed_line_points = [scale(point) for point in edge.points[-2:]]
 					cv2.arrowedLine(img, arrowed_line_points[0], arrowed_line_points[1], color=(255, 60, 162), thickness=5, tipLength=0.1)
 
-		# Draw cursor
-		cx, cy = scale(cursor)
-		cv2.circle(img, (cx, cy), 10, (0, 0, 255), -1)
+		if cursor != None:
+			# Draw cursor
+			cx, cy = scale(cursor)
+			cv2.circle(img, (cx, cy), 10, (0, 0, 255), -1)
 
 		cv2.imshow("Pieces", img)
 		cv2.waitKey(0)
