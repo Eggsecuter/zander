@@ -68,8 +68,9 @@ class PolygonUtility:
 
 		area *= 0.5
 
-		cx /= (6 * area)
-		cy /= (6 * area)
+		if area > 0:
+			cx /= (6 * area)
+			cy /= (6 * area)
 
 		return Vector2(cx, cy)
 
@@ -110,11 +111,11 @@ class PolygonUtility:
 					break
 
 				# check valid frame line
-				if PolygonUtility.__line_intersects_polygon(a, b, points, start % point_count, end % point_count):
-					break
+				# if PolygonUtility.__line_intersects_polygon(a, b, points, start % point_count, end % point_count):
+				# 	break
 
-				if not PolygonUtility.__is_polygon_one_side(a, b, points, start % point_count, end % point_count):
-					break
+				# if not PolygonUtility.__is_polygon_one_side(a, b, points, start % point_count, end % point_count):
+				# 	break
 
 				end += 1
 
@@ -137,22 +138,21 @@ class PolygonUtility:
 		current_combined_edge = None
 		removal_edge_indices = []
 
-		for index, edge in enumerate(edges):
-			other_index = (index + 1) % len(edges)
-			other = edges[other_index]
+		# for index, edge in enumerate(edges):
+		# 	other_index = (index + 1) % len(edges)
+		# 	other = edges[other_index]
 
-			if edge.end.distance_to(other.start) <= corner_margin and Angle.is_right_angle(edge.get_end_angle(), other.get_start_angle(), corner_margin_radiants):
-				if current_combined_edge is None:
-					current_combined_edge = edge
+		# 	if edge.end.distance_to(other.start) <= corner_margin and Angle.is_right_angle(edge.get_end_angle(), other.get_start_angle(), corner_margin_radiants):
+		# 		if current_combined_edge is None:
+		# 			current_combined_edge = edge
 
-				current_combined_edge.point_indices.extend(other.point_indices[1:])
-				removal_edge_indices.append(other_index)
-			else:
-				current_combined_edge = None
+		# 		current_combined_edge.point_indices.extend(other.point_indices[1:])
+		# 		removal_edge_indices.append(other_index)
+		# 	else:
+		# 		current_combined_edge = None
 
 		# filter marked edges which got combined into an other
-		# edges = [edge for index, edge in enumerate(edges) if index not in removal_edge_indices]
-
+		edges = [edge for index, edge in enumerate(edges) if index not in removal_edge_indices]
 		edges.sort(key=lambda edge: edge.get_length(), reverse=True)
 
 		return edges
