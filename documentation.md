@@ -1,0 +1,26 @@
+# What to document
+- Things for test run (3D puzzle models, 3D prints with photos)
+	- Results (how fast to calculate solution, how fast for complete run)
+- Camera calibration
+	- Manual depth (120 degree model does not have auto focus)
+	- Aurco Codes (entzerrung)
+	- Pixel to mm (also Aurco)
+	- fail with night camera and solution with exchange of 3rd person
+	- once or every time it boots? on boot or every time we start?
+- Algorithm redo
+	- Try out different image loading thresholds instead of one and take the best
+	- Now also accounts for piece height
+	- Better custom frame edge detection
+	- Better matching (also with triangle corners and pieces with multiple non consecutive frame edges)
+	- Matching now also runs with multiple margins and takes the option with the least overlaps (now also has a higher chance of finding a solution)
+	- Now also rotates and not only transposes into frame
+- UART communication
+	- Protocol
+	- Message Queue
+	- Error abort logic
+- Visualizer discontinued
+	- Now just prints the results to the screen instead of godot (its just a time waste)
+- Pixel to mm for CoreXY system
+	- Camera now is only above A4 area
+	- Frame gets stored hardcoded because it is fixed on the whole surface
+	- Translation into frame with mm system
