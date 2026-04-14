@@ -56,6 +56,12 @@ Strukturierte Stichpunkte aus Git-Commits und Projektentwicklung (Kamera, Pi, Ka
 
 ---
 
+## OpenCV ArUco-API
+
+- Es wird **`cv2.aruco.ArucoDetector`** (OpenCV contrib ≥ 4.7) verwendet — keine Legacy-`detectMarkers`-Funktion.
+
+---
+
 ## Verwandte Dokumentation im Repo
 
 - **`docs/camera-calibration.md`**: CLI, Parameter, Pi-Setup, YAML-Inhalt, `detect` mit Entzerrung.

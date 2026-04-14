@@ -1,3 +1,5 @@
+"""ArUco live detection — requires OpenCV contrib >= 4.7 (cv2.aruco.ArucoDetector)."""
+
 from pathlib import Path
 
 import cv2
@@ -70,6 +72,7 @@ def detect_markers_from_camera(
 
     aruco_dict = aruco.getPredefinedDictionary(DICT)
     params = aruco.DetectorParameters()
+    detector = aruco.ArucoDetector(aruco_dict, params)
 
     with CameraService(
         index=camera_index,
@@ -86,7 +89,7 @@ def detect_markers_from_camera(
                 frame = undistort_bgr_frame(frame, mtx, dist, calib_wh)
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            corners, ids, _ = aruco.detectMarkers(gray, aruco_dict, parameters=params)
+            corners, ids, _ = detector.detectMarkers(gray)
 
             display = frame.copy()
             if ids is not None and len(ids) > 0:
