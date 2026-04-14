@@ -15,11 +15,13 @@ class CameraService:
         output_size: tuple[int, int] = (1920, 1080),
         square_crop: bool = False,
         *,
+        lens_position: float = 5.0,
         picamera_rgb_buffer: bool = True,
     ):
         self._index = index
         self._output_size = output_size
         self._square_crop = square_crop
+        self._lens_position = lens_position
         self._picamera_rgb_buffer = picamera_rgb_buffer
         self._cam = None
         self._fallback = False
@@ -48,7 +50,8 @@ class CameraService:
             if lock_focus:
                 self._cam.set_controls({
                     "AfMode": controls.AfModeEnum.Manual,
-                    "LensPosition": 8.3,
+                    # Dioptrien ≈ 1 / Abstand_sensor_zur_Arbeitsfläche_in_m (hier 20 cm → 5.0)
+                    "LensPosition": self._lens_position,
                 })
 
             self._fallback = False

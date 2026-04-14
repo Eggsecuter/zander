@@ -29,11 +29,13 @@ Abstrahiert den Kamerazugriff. Auf dem Raspberry Pi wird **Picamera2** verwendet
 
 `open()` akzeptiert einen `lock_focus: bool = True` Parameter. Ist er aktiv, wird der Autofokus des Pi Camera Module 3 auf manuell fixiert.
 
-`LensPosition` ist in Dioptrien (`1 / Distanz_in_Meter`). Bei der finalen Montagehöhe von **12 cm** über der Arbeitsfläche:
+`LensPosition` ist in Dioptrien (`1 / Distanz_in_Meter`). Bei **20 cm** Abstand Sensor zur Arbeitsfläche (A4-Bereich + Reserve):
 
 ```
-LensPosition = 1 / 0.12 ≈ 8.3
+LensPosition = 1 / 0.20 = 5.0
 ```
+
+Über `CameraService(lens_position=…)` anpassbar, falls sich der Abstand ändert.
 
 > **Wichtig:** Der Wert muss identisch für Kalibrierung und Betrieb sein. Nur so stimmen die intrinsischen Parameter der `camera.yml` mit der tatsächlichen Aufnahmesituation überein.
 
@@ -44,6 +46,7 @@ LensPosition = 1 / 0.12 ≈ 8.3
 | `index` | `0` | Kamera-Index (nur cv2-Fallback) |
 | `output_size` | `(1920, 1080)` | Ausgabeauflösung |
 | `square_crop` | `False` | Quadratischen Mittelschnitt aktivieren |
+| `lens_position` | `5.0` | Manuelle Fokus-Position in Dioptrien (`1/m`); Standard für **20 cm** Abstand zur Arbeitsfläche |
 | `picamera_rgb_buffer` | `True` | Nach `capture_array()` von RGB→BGR wandeln (Picamera2 liefert oft RGB-Reihenfolge; sonst wirken Hauttöne bläulich) |
 | `lock_focus` | `True` | Autofokus fixieren (nur Picamera2) |
 
@@ -174,4 +177,4 @@ cv_file.release()
 
 ## Offene TODOs
 
-- [x] `LensPosition` auf `8.3` gesetzt (= 12 cm Montagehöhe)
+- [x] `LensPosition` Standard **5.0** (= 20 cm Abstand zur Arbeitsfläche); Kalibrierbereich: A4 + Reserve (keine volle Tischfläche nötig)
