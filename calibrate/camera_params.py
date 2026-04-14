@@ -40,14 +40,14 @@ def load_camera_calibration(
     fs = cv2.FileStorage(str(path), cv2.FILE_STORAGE_READ)
     mtx = fs.getNode("matrix").mat()
     dist = fs.getNode("distortion_coef").mat()
-    size_node = fs.getNode("calibration_size")
+    # Read all .mat() before fs.release() — nodes are invalid after close (OpenCV 4.13+).
+    sz = fs.getNode("calibration_size").mat()
     fs.release()
 
     if mtx is None or dist is None or mtx.size == 0 or dist.size == 0:
         return None
 
     calib_wh: tuple[int, int] | None = None
-    sz = size_node.mat()
     if sz is not None and sz.size >= 2:
         calib_wh = (int(sz.flat[0]), int(sz.flat[1]))
 
