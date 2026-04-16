@@ -4,7 +4,7 @@ import cv2
 from cv2.typing import MatLike
 import numpy as np
 from shapely import Polygon
-from solver.environment import Environment
+from solver.logger import Logger
 from solver.constants import *
 
 class ContourDetector:
@@ -46,11 +46,9 @@ class ContourDetector:
 				best_score = score
 				best_result = polygons
 
-			if Environment.log_results:
-				print(f"[THRESHOLD={threshold}]\t[SCORE={score:.3f}]\tFound {len(polygons)} pieces with {[len(polygon.exterior.coords) for polygon in polygons]} points")
+			Logger.log(f"[THRESHOLD={threshold}]\t[SCORE={score:.3f}]\tFound {len(polygons)} pieces with {[len(polygon.exterior.coords) for polygon in polygons]} points")
 
-		if Environment.log_results:
-			print(f"Best score is {best_score}")
+		Logger.log(f"Best score is {best_score}")
 
 		return best_result
 

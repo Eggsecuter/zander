@@ -1,6 +1,6 @@
 import time
 from typing import List
-from solver.environment import Environment
+from solver.logger import Logger
 
 from solver.pipeline.contour_detector import ContourDetector
 
@@ -20,6 +20,5 @@ class Puzzle:
 
 		total_delta_time = time.time() - total_start_time
 
-		if Environment.log_results:
-			print(f"Solved in {total_delta_time:.4f}s")
-			print(f"\tContour took {contour_delta_time:.4f}s")
+		Logger.log(f"Solved in {total_delta_time:.4f}s")
+		Logger.log(f"\tContour took {contour_delta_time:.4f}s")

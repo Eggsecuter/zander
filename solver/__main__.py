@@ -2,7 +2,7 @@ import sys
 
 import cv2
 
-from solver.environment import Environment
+from solver.logger import Logger
 from solver.puzzle import Puzzle
 from solver.uart_handler import UartHandler
 
@@ -12,11 +12,11 @@ def prod():
 	UartHandler(UART_PORT)
 
 def test():
-	Environment.log_results = True
+	Logger.enable_logs()
 	UartHandler(UART_PORT)
 
 def debug(path: str):
-	Environment.log_results = True
+	Logger.enable_logs()
 	image = cv2.imread(path)
 
 	if image is None:
