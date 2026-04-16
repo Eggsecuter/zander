@@ -23,6 +23,17 @@ uv add --group dev <package>
 
 ## Start
 ### Solver
+Prod
 ```bash
 uv run python -m solver
+```
+
+Test
+```bash
+uv run python -m solver --test
+```
+
+Debug
+```bash
+uv run python -m solver <image-path>
 ```

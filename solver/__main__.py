@@ -1,27 +1,35 @@
 import sys
 
-from solver.example.buffer_example import buffer
-from solver.solver import Solver
+import cv2
+
+from solver.environment import Environment
+from solver.puzzle import Puzzle
 from solver.uart_handler import UartHandler
 
 UART_PORT = '/dev/tty.AMA4'
 
-def main():
+def prod():
 	UartHandler(UART_PORT)
 
-def main_debug():
-	main = Solver(True)
-	main.load_image_from_path('./data/testing/1.png')
-	main.run()
+def test():
+	Environment.log_results = True
+	UartHandler(UART_PORT)
+
+def debug(path: str):
+	Environment.log_results = True
+	image = cv2.imread(path)
+
+	if image is None:
+		raise FileNotFoundError(f"Image not found: {path}")
+
+	puzzle = Puzzle(image)
+	puzzle.solve()
 
 if __name__ == "__main__":
-	debug = False
-
 	if len(sys.argv) >= 2:
-		if sys.argv[1] == '--debug':
-			debug = True
-
-	if debug:
-		main_debug()
+		if (sys.argv[1] == '--test'):
+			test()
+		else:
+			debug(sys.argv[1])
 	else:
-		main()
+		prod()

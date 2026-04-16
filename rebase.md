@@ -7,12 +7,12 @@ Test - Show image of step then send via UART
 Prod - Only UART
 
 ## ShapeDetection (with image loader)
+- Crop image to A4 area
 - Grayscale (maybe also account for color -> make everything black except white)
 - Blurred
 - Threshold
-- Disregard points out of bounding box (crop camera image to A4 place)
-- Account for puzzle piece height 6mm (homography)
 - Roughen the shape
+- Account for puzzle piece height 6mm (homography)
 
 **Do the above with different thresholds and take the best option**
 - Area of all shapes should add up to A5 area
@@ -20,7 +20,6 @@ Prod - Only UART
 
 ## PieceDetection
 - Check biggest colinearities
-- The formed line shouldn't touch another point ever again (forming hole inside or hitting rest of polygon)
 
 # Matcher
 - Try each combination of piece and edge placements
