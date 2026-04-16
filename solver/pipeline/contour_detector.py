@@ -4,7 +4,7 @@ import cv2
 from cv2.typing import MatLike
 import numpy as np
 from shapely import Polygon
-from solver.logger import Logger
+from solver.debugger import Debugger
 from solver.constants import *
 
 class ContourDetector:
@@ -46,9 +46,9 @@ class ContourDetector:
 				best_score = score
 				best_result = polygons
 
-			Logger.log(f"[THRESHOLD={threshold}]\t[SCORE={score:.3f}]\tFound {len(polygons)} pieces with {[len(polygon.exterior.coords) for polygon in polygons]} points")
+			Debugger.log(f"[THRESHOLD={threshold}]\t[SCORE={score:.3f}]\tFound {len(polygons)} pieces with {[len(polygon.exterior.coords) for polygon in polygons]} points")
 
-		Logger.log(f"Best score is {best_score}")
+		Debugger.log(f"Best score is {best_score}")
 
 		return best_result
 
@@ -67,7 +67,7 @@ class ContourDetector:
 
 				polygon = Polygon(points)
 				# roughen shape for better performance
-				polygon = Polygon(polygon.simplify(0.99))
+				polygon = polygon.simplify(1.5, preserve_topology=True)
 
 				if polygon.is_valid and polygon.area >= PIECE_MIN_AREA_PIXEL:
 					polygons.append(polygon)
@@ -86,5 +86,15 @@ class ContourDetector:
 		# validate contour count offset
 		count_penalty = min(abs(len(polygons) - count) for count in PIECE_COUNTS)
 
-		# count is a more significant fail indication
-		return area_error + count_penalty * 10
+		# validate contour noise
+		vertex_penalty = sum(len(polygon.exterior.coords) for polygon in polygons) / len(polygons)
+		compactness_penalty = sum((polygon.length / polygon.area) for polygon in polygons if polygon.area > 0) / len(polygons)
+		convexity_penalty = sum(((p.convex_hull.area - p.area) / p.convex_hull.area) for p in polygons if p.convex_hull.area > 0) / len(polygons)
+
+		return (
+			area_error
+			+ vertex_penalty * 0.01
+			+ compactness_penalty * 0.1
+			+ convexity_penalty * 2
+			+ count_penalty * 10
+		)
