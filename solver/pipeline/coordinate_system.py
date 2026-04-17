@@ -9,9 +9,16 @@ class CoordinateSystem:
 	@staticmethod
 	def correct(pieces: List[Piece]) -> List[Piece]:
 		for piece in pieces:
-			piece.original = translate(piece.original, A4_OFFSET_LEFT_PIXEL, A4_OFFSET_TOP_PIXEL)
-			piece.edges = [translate(edge, A4_OFFSET_LEFT_PIXEL, A4_OFFSET_TOP_PIXEL) for edge in piece.edges]
+			piece.original = CoordinateSystem.__correct_A4(piece.original)
+			piece.edges = [CoordinateSystem.__correct_A4(edge) for edge in piece.edges]
 
 		return pieces
 
-	# TODO translate and rotate piece.placed into A5 frame
+	@staticmethod
+	def __correct_A4(geometry):
+		return translate(geometry, A4_OFFSET_LEFT_PIXEL, A4_OFFSET_TOP_PIXEL)
+
+	@staticmethod
+	def __correct_A5(geometry):
+		# TODO translate and rotate piece.placed into A5 frame
+		pass
