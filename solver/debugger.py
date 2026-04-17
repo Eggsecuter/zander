@@ -24,17 +24,20 @@ class Debugger:
 		if not Debugger.__enabled:
 			return
 
-		plot = Plot()
-		plot.addImage(image)
+		try:
+			plot = Plot()
+			plot.addImage(image)
 
-		plot.addPoint(Point((A4_OFFSET_LEFT_PIXEL, A4_OFFSET_TOP_PIXEL)))
-		plot.addPoint(Point((A4_OFFSET_LEFT_PIXEL + A4_WIDTH_MICROMETER / PIXEL_TO_MICROMETER_FACTOR, A4_OFFSET_TOP_PIXEL + A4_HEIGHT_MICROMETER / PIXEL_TO_MICROMETER_FACTOR)))
+			plot.addPoint(Point((A4_OFFSET_LEFT_PIXEL, A4_OFFSET_TOP_PIXEL)))
+			plot.addPoint(Point((A4_OFFSET_LEFT_PIXEL + A4_WIDTH_MICROMETER / PIXEL_TO_MICROMETER_FACTOR, A4_OFFSET_TOP_PIXEL + A4_HEIGHT_MICROMETER / PIXEL_TO_MICROMETER_FACTOR)))
 
-		for piece in pieces:
-			plot.addPolygon(piece.polygon, thickness=5)
-			plot.addPoint(piece.polygon.centroid)
+			for piece in pieces:
+				plot.addPolygon(piece.polygon, thickness=5)
+				plot.addPoint(piece.polygon.centroid)
 
-			for edge in piece.edges:
-				plot.addLine(edge, color=(255, 0, 0), thickness=3)
+				for edge in piece.edges:
+					plot.addLine(edge, color=(255, 0, 0), thickness=3)
 
-		plot.show()
+			plot.show()
+		except:
+			return
