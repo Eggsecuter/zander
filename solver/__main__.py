@@ -6,7 +6,7 @@ from solver.debugger import Debugger
 from solver.puzzle import Puzzle
 from solver.uart_handler import UartHandler
 
-UART_PORT = '/dev/tty.AMA4'
+UART_PORT = '/dev/ttyAMA4'
 
 def prod():
 	UartHandler(UART_PORT)
