@@ -16,7 +16,7 @@ class CoordinateSystem:
 
 	@staticmethod
 	def __correct_A4(geometry):
-		return translate(geometry, A4_OFFSET_LEFT_PIXEL, A4_OFFSET_TOP_PIXEL)
+		return translate(geometry, A4_OFFSET_LEFT_PIXEL * PIXEL_TO_MICROMETER_FACTOR + A4_OFFSET_LEFT_MICROMETER, A4_OFFSET_TOP_PIXEL * PIXEL_TO_MICROMETER_FACTOR + A4_OFFSET_TOP_MICROMETER)
 
 	@staticmethod
 	def __correct_A5(geometry):

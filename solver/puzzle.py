@@ -7,6 +7,7 @@ from solver.pipeline.contour_detector import ContourDetector
 from solver.pipeline.coordinate_system import CoordinateSystem
 from solver.pipeline.matcher import Matcher
 from solver.pipeline.piece_detector import PieceDetector
+from solver.constants import *
 
 
 class Puzzle:

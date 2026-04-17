@@ -1,5 +1,8 @@
 from typing import List
+
+from shapely import Point
 from solver.plot import Plot
+from solver.constants import *
 
 
 class Debugger:
@@ -18,6 +21,9 @@ class Debugger:
 	def plot(image, pieces):
 		plot = Plot()
 		plot.addImage(image)
+
+		plot.addPoint(Point((A4_OFFSET_LEFT_PIXEL, A4_OFFSET_TOP_PIXEL)))
+		plot.addPoint(Point((A4_OFFSET_LEFT_PIXEL + A4_WIDTH_MICROMETER / PIXEL_TO_MICROMETER_FACTOR, A4_OFFSET_TOP_PIXEL + A4_HEIGHT_MICROMETER / PIXEL_TO_MICROMETER_FACTOR)))
 
 		for piece in pieces:
 			plot.addPolygon(piece.polygon, thickness=5)

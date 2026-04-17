@@ -14,8 +14,8 @@ class ContourDetector:
 	def detect(image) -> List[Polygon]:
 		# crop image to A4 area
 		cropped_image = image[
-			A4_OFFSET_TOP_PIXEL : int(A4_OFFSET_TOP_PIXEL + A4_HEIGHT_MM / PIXEL_TO_MM_FACTOR),
-			A4_OFFSET_LEFT_PIXEL : int(A4_OFFSET_LEFT_PIXEL + A4_WIDTH_MM / PIXEL_TO_MM_FACTOR)
+			A4_OFFSET_TOP_PIXEL : int(A4_OFFSET_TOP_PIXEL + A4_HEIGHT_MICROMETER / PIXEL_TO_MICROMETER_FACTOR),
+			A4_OFFSET_LEFT_PIXEL : int(A4_OFFSET_LEFT_PIXEL + A4_WIDTH_MICROMETER / PIXEL_TO_MICROMETER_FACTOR)
 		]
 
 		# ignore color
@@ -56,7 +56,7 @@ class ContourDetector:
 
 	@staticmethod
 	def __get_target_area() -> float:
-		return A5_WIDTH_MM * A5_HEIGHT_MM / PIXEL_TO_MM_FACTOR
+		return A5_WIDTH_MICROMETER * A5_HEIGHT_MICROMETER / PIXEL_TO_MICROMETER_FACTOR
 
 	@staticmethod
 	def __to_polygons(contours: Sequence[MatLike]) -> List[Polygon]:

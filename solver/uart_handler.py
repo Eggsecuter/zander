@@ -84,9 +84,11 @@ class UartHandler:
 				f"move|x={int(piece.polygon.centroid.x)}|y={int(piece.polygon.centroid.y)}|rot=0\n"
 			)
 			self.messages.append(f"pick\n")
-			self.messages.append(
-				f"move|x={int(piece.placedPiece.polygon.centroid.x)}|y={int(piece.placedPiece.polygon.centroid.y)}|rot={int(piece.placedPiece.rotation * ROTATION_ACCURACY)}\n"
-			)
+			# self.messages.append(
+			# 	f"move|x={int(piece.placedPiece.polygon.centroid.x)}|y={int(piece.placedPiece.polygon.centroid.y)}|rot={int(piece.placedPiece.rotation * ROTATION_ACCURACY)}\n"
+			# )
 			self.messages.append(f"place\n")
 
 		self.messages.append("finish\n")
+
+		Debugger.log(self.messages)
