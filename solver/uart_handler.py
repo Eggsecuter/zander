@@ -1,6 +1,7 @@
 from typing import List
 
 from serial import Serial
+from solver.constants import *
 from solver.debugger import Debugger
 from solver.puzzle import Puzzle
 
@@ -84,7 +85,7 @@ class UartHandler:
 			)
 			self.messages.append(f"pick\n")
 			self.messages.append(
-				f"move|x={int(piece.placedPiece.polygon.centroid.x)}|y={int(piece.placedPiece.polygon.centroid.y)}|rot={int(piece.placedPiece.rotation * 100)}\n"
+				f"move|x={int(piece.placedPiece.polygon.centroid.x)}|y={int(piece.placedPiece.polygon.centroid.y)}|rot={int(piece.placedPiece.rotation * ROTATION_ACCURACY)}\n"
 			)
 			self.messages.append(f"place\n")
 
