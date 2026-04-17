@@ -14,11 +14,16 @@ class Debugger:
 
 	@staticmethod
 	def log(message: str):
-		if Debugger.__enabled:
-			print(message)
+		if not Debugger.__enabled:
+			return
+
+		print(message)
 
 	@staticmethod
 	def plot(image, pieces):
+		if not Debugger.__enabled:
+			return
+
 		plot = Plot()
 		plot.addImage(image)
 
