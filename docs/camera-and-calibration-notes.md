@@ -27,7 +27,7 @@ Strukturierte Stichpunkte aus Git-Commits und Projektentwicklung (Kamera, Pi, Ka
 - **Kalibrierumfang**: ausreichend Schachbrett-Fotos über dem **A4-Bereich (+ Reserve)** für Puzzleteil-Erkennung; keine Kalibrierung über die gesamte frühere Tischfläche nötig — wichtig sind weiterhin **gute Winkelabdeckung** und **Ecken/Ränder** im Bild für die Weitwinkel-Entzerrung.
 - **Farbkanäle**: Picamera2/`capture_array` oft **RGB-Reihenfolge**, OpenCV erwartet **BGR** → Option **`picamera_rgb_buffer`** (RGB→BGR), sonst „blaue Haut“ in der Vorschau.
 - **Headless vs. GUI**: **`opencv-contrib-python-headless`** vermeidet Qt-Display-Probleme über SSH; **mit VNC/Desktop** kann **`opencv-contrib-python`** (mit GUI) für `imshow` sinnvoll sein.
-- **Auflösung / Sensor**: Preview mit **BGR888**, konfigurierbare **Ausgabegröße**, optional **quadratischer Crop** (`square_crop`) für einheitliches Seitenverhältnis.
+- **Auflösung / Sensor**: Standard **Still-Konfiguration** (Picamera2, bessere Qualität als reine Preview-Pipeline) mit **BGR888**, konfigurierbare **Ausgabegröße** (`use_still_configuration=False` → Preview), optional **quadratischer Crop** (`square_crop`) für einheitliches Seitenverhältnis.
 
 ---
 

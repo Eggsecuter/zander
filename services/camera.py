@@ -13,6 +13,10 @@ class CameraService:
     Abstracts camera access: uses Picamera2 on Raspberry Pi,
     falls back to cv2.VideoCapture for local development.
 
+    Uses **still** configuration by default (``create_still_configuration``): ISP tuned for
+    photo-style captures (e.g. higher noise reduction quality vs preview). Pass
+    ``use_still_configuration=False`` for ``create_preview_configuration`` if you need higher FPS.
+
     Pass ``output_size=None`` to use Picamera2's ``sensor_resolution`` (for Camera Module 3 /
     IMX708 typically **4608×2592**, same as :data:`RPI_CAMERA_MODULE3_IMX708_MAX_SIZE`).
     That is the sharpest main stream; higher CPU/RAM use than 1080p.
@@ -26,6 +30,7 @@ class CameraService:
         output_size: tuple[int, int] | None = (1920, 1080),
         square_crop: bool = False,
         *,
+        use_still_configuration: bool = True,
         lens_position: float = 4.347826087,
         picamera_rgb_buffer: bool = True,
         exposure_value: float | None = 1.09,
@@ -39,6 +44,7 @@ class CameraService:
         self._picamera_rgb_buffer = picamera_rgb_buffer
         self._exposure_value = exposure_value
         self._ae_metering = ae_metering
+        self._use_still_configuration = use_still_configuration
         self._cam = None
         self._fallback = False
         self._configured_main_size: tuple[int, int] | None = None
@@ -52,7 +58,7 @@ class CameraService:
             sensor_res = self._cam.sensor_resolution
             main_size = self._output_size if self._output_size is not None else sensor_res
 
-            config = self._cam.create_preview_configuration(
+            stream_kw = dict(
                 main={
                     "format": "BGR888",
                     "size": main_size,
@@ -62,6 +68,10 @@ class CameraService:
                 },
                 buffer_count=2,
             )
+            if self._use_still_configuration:
+                config = self._cam.create_still_configuration(**stream_kw)
+            else:
+                config = self._cam.create_preview_configuration(**stream_kw)
             self._cam.configure(config)
             try:
                 main_cfg = self._cam.stream_configuration("main")

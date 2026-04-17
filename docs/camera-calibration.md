@@ -45,6 +45,7 @@ LensPosition = 1 / 0.20 = 5.0
 |---|---|---|
 | `index` | `0` | Kamera-Index (nur cv2-Fallback) |
 | `output_size` | `(1920, 1080)` | Ausgabeauflösung; `None` = volle Sensorauflösung (Picamera2), mehr Pixel, höhere Last. Camera Module 3 (IMX708): typisch **4608×2592** — Konstante `RPI_CAMERA_MODULE3_IMX708_MAX_SIZE` in `services/camera.py`; nach `open()` liefert `configured_main_size` die tatsächlich konfigurierte Größe |
+| `use_still_configuration` | `True` | `True`: Picamera2 **Still**-Pfad (bessere Bildqualität als reine Vorschau); `False`: **Preview**-Pfad (oft höhere FPS) |
 | `square_crop` | `False` | Quadratischen Mittelschnitt aktivieren |
 | `lens_position` | `5.0` | Manuelle Fokus-Position in Dioptrien (`1/m`); Standard für **20 cm** Abstand zur Arbeitsfläche |
 | `picamera_rgb_buffer` | `True` | Nach `capture_array()` von RGB→BGR wandeln (Picamera2 liefert oft RGB-Reihenfolge; sonst wirken Hauttöne bläulich) |
