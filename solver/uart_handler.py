@@ -1,5 +1,6 @@
 from typing import List
 
+import cv2
 from serial import Serial
 from solver.constants import *
 from solver.debugger import Debugger
@@ -69,7 +70,7 @@ class UartHandler:
 
 	def __solve(self):
 		# TODO capture image
-		image = None
+		image = cv2.imread('./data/test-5.png')
 
 		pieces = Puzzle.solve(image)
 
