@@ -15,7 +15,7 @@ class CameraService:
         output_size: tuple[int, int] = (1920, 1080),
         square_crop: bool = False,
         *,
-        lens_position: float = 5.0,
+        lens_position: float = 4.347826087,
         picamera_rgb_buffer: bool = True,
     ):
         self._index = index
