@@ -17,7 +17,7 @@ class CameraService:
         *,
         lens_position: float = 4.347826087,
         picamera_rgb_buffer: bool = True,
-        exposure_value: float | None = 1.25,
+        exposure_value: float | None = 1.14,
         ae_metering: str | None = "spot",
     ):
         self._index = index
