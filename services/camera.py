@@ -17,12 +17,16 @@ class CameraService:
         *,
         lens_position: float = 4.347826087,
         picamera_rgb_buffer: bool = True,
+        exposure_value: float | None = 1.25,
+        ae_metering: str | None = "spot",
     ):
         self._index = index
         self._output_size = output_size
         self._square_crop = square_crop
         self._lens_position = lens_position
         self._picamera_rgb_buffer = picamera_rgb_buffer
+        self._exposure_value = exposure_value
+        self._ae_metering = ae_metering
         self._cam = None
         self._fallback = False
 
@@ -47,12 +51,31 @@ class CameraService:
             self._cam.configure(config)
             self._cam.start()
 
+            ctrl: dict = {}
             if lock_focus:
-                self._cam.set_controls({
+                ctrl.update({
                     "AfMode": controls.AfModeEnum.Manual,
                     # Dioptrien ≈ 1 / Abstand_sensor_zur_Arbeitsfläche_in_m (hier 20 cm → 5.0)
                     "LensPosition": self._lens_position,
                 })
+            if self._exposure_value is not None:
+                ctrl["ExposureValue"] = float(self._exposure_value)
+            if self._ae_metering is not None:
+                metering = self._ae_metering.strip().lower()
+                modes = {
+                    "centre": controls.AeMeteringModeEnum.CentreWeighted,
+                    "center": controls.AeMeteringModeEnum.CentreWeighted,
+                    "spot": controls.AeMeteringModeEnum.Spot,
+                    "average": controls.AeMeteringModeEnum.Matrix,
+                    "matrix": controls.AeMeteringModeEnum.Matrix,
+                }
+                if metering not in modes:
+                    raise ValueError(
+                        f"ae_metering must be one of {sorted(modes)!r}, got {self._ae_metering!r}"
+                    )
+                ctrl["AeMeteringMode"] = modes[metering]
+            if ctrl:
+                self._cam.set_controls(ctrl)
 
             self._fallback = False
 
