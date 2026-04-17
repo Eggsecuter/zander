@@ -8,6 +8,6 @@ class Matcher:
 	def match(pieces: List[Piece]) -> List[Piece]:
 		for piece in pieces:
 			copied_piece = copy.deepcopy(piece.polygon)
-			piece.place(copied_piece)
+			piece.place(copied_piece, 0)
 
 		return pieces

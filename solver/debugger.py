@@ -20,8 +20,8 @@ class Debugger:
 		plot.addImage(image)
 
 		for piece in pieces:
-			plot.addPolygon(piece.original, thickness=5)
-			plot.addPoint(piece.original.centroid)
+			plot.addPolygon(piece.polygon, thickness=5)
+			plot.addPoint(piece.polygon.centroid)
 
 			for edge in piece.edges:
 				plot.addLine(edge, color=(255, 0, 0), thickness=3)
