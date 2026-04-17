@@ -78,8 +78,6 @@ class UartHandler:
 			return
 
 		# create message list
-		self.messages.append("reset\n")
-
 		for piece in pieces:
 			self.messages.append(
 				f"move|x={int(piece.polygon.centroid.x)}|y={int(piece.polygon.centroid.y)}|rot=0\n"
