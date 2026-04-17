@@ -1,3 +1,5 @@
+# TODO use micrometer instead of mm
+
 # puzzle helper values
 PIECE_COUNTS = [4, 6]
 PUZZLE_HEIGHT_MM = 6

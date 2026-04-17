@@ -9,7 +9,7 @@ class CoordinateSystem:
 	@staticmethod
 	def correct(pieces: List[Piece]) -> List[Piece]:
 		for piece in pieces:
-			piece.original = CoordinateSystem.__correct_A4(piece.original)
+			piece.polygon = CoordinateSystem.__correct_A4(piece.polygon)
 			piece.edges = [CoordinateSystem.__correct_A4(edge) for edge in piece.edges]
 
 		return pieces

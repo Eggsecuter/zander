@@ -7,7 +7,7 @@ class Matcher:
 	@staticmethod
 	def match(pieces: List[Piece]) -> List[Piece]:
 		for piece in pieces:
-			copied_piece = copy.deepcopy(piece.original)
+			copied_piece = copy.deepcopy(piece.polygon)
 			piece.place(copied_piece)
 
 		return pieces

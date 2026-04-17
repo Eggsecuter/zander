@@ -4,6 +4,7 @@ from serial import Serial
 from solver.debugger import Debugger
 from solver.puzzle import Puzzle
 
+
 class UartHandler:
 	stream: Serial
 	messages: List[str] = []
@@ -77,6 +78,14 @@ class UartHandler:
 		# create message list
 		self.messages.append("reset\n")
 
-		# TODO piece messages
+		for piece in pieces:
+			self.messages.append(
+				f"move|x={int(piece.polygon.centroid.x)}|y={int(piece.polygon.centroid.y)}|rot=0\n"
+			)
+			self.messages.append(f"pick\n")
+			self.messages.append(
+				f"move|x={int(piece.placedPiece.polygon.centroid.x)}|y={int(piece.placedPiece.polygon.centroid.y)}|rot={int(piece.placedPiece.rotation * 100)}\n"
+			)
+			self.messages.append(f"place\n")
 
 		self.messages.append("finish\n")
