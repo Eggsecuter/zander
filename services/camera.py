@@ -2,15 +2,22 @@ import numpy as np
 
 import cv2
 
+# Raspberry Pi Camera Module 3 (IMX708): wide and standard share the same 12.3 MP sensor.
+# Picamera2's ``sensor_resolution`` matches this; use as explicit ``output_size`` if you want
+# a documented choice instead of ``None``.
+RPI_CAMERA_MODULE3_IMX708_MAX_SIZE: tuple[int, int] = (4608, 2592)
+
 
 class CameraService:
     """
     Abstracts camera access: uses Picamera2 on Raspberry Pi,
     falls back to cv2.VideoCapture for local development.
 
-    Pass ``output_size=None`` for the sensor's maximum resolution (sharpest main stream;
-    higher load than 1080p). ``camera_params.undistort_bgr_frame`` scales intrinsics when
-    the live frame size differs from ``camera.yml``.
+    Pass ``output_size=None`` to use Picamera2's ``sensor_resolution`` (for Camera Module 3 /
+    IMX708 typically **4608×2592**, same as :data:`RPI_CAMERA_MODULE3_IMX708_MAX_SIZE`).
+    That is the sharpest main stream; higher CPU/RAM use than 1080p.
+    ``camera_params.undistort_bgr_frame`` scales intrinsics when the live frame size differs
+    from ``camera.yml``.
     """
 
     def __init__(
@@ -34,6 +41,7 @@ class CameraService:
         self._ae_metering = ae_metering
         self._cam = None
         self._fallback = False
+        self._configured_main_size: tuple[int, int] | None = None
 
     def open(self, lock_focus: bool = True) -> None:
         try:
@@ -55,6 +63,12 @@ class CameraService:
                 buffer_count=2,
             )
             self._cam.configure(config)
+            try:
+                main_cfg = self._cam.stream_configuration("main")
+                sz = main_cfg["size"]
+                self._configured_main_size = (int(sz[0]), int(sz[1]))
+            except (KeyError, TypeError, IndexError, ValueError):
+                self._configured_main_size = None
             self._cam.start()
 
             ctrl: dict = {}
@@ -93,6 +107,12 @@ class CameraService:
                 self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self._output_size[0])
                 self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self._output_size[1])
             self._fallback = True
+            self._configured_main_size = None
+
+    @property
+    def configured_main_size(self) -> tuple[int, int] | None:
+        """``(width, height)`` of the main stream after ``open()``, or ``None`` (fallback / not opened)."""
+        return self._configured_main_size
 
     def read(self) -> tuple[bool, np.ndarray]:
         """Returns (success, frame) — same interface as cv2.VideoCapture.read()."""
@@ -130,6 +150,7 @@ class CameraService:
         else:
             self._cam.stop()
         self._cam = None
+        self._configured_main_size = None
 
     def __enter__(self) -> "CameraService":
         self.open()
