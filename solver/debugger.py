@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from shapely import Point
@@ -23,6 +24,10 @@ class Debugger:
 	def plot(image, pieces):
 		if not Debugger.__enabled:
 			return
+
+		if os.name != "nt":
+			if "DISPLAY" not in os.environ:
+				return
 
 		try:
 			plot = Plot()
