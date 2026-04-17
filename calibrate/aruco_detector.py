@@ -3,23 +3,26 @@
 from pathlib import Path
 
 import cv2
-import numpy as np
 import cv2.aruco as aruco
 
 from calibrate.camera_params import load_camera_calibration, undistort_bgr_frame
 from services.camera import CameraService
 
 DICT = aruco.DICT_4X4_50
-GROUP_A = [0, 1, 2, 3, 0]
-GROUP_B = [4, 5, 7, 6, 4]
+
+# (path_marker_ids, BGR color) — each path is drawn as a polyline between marker centers.
+PATHS: list[tuple[list[int], tuple[int, int, int]]] = [
+    ([0, 1, 2, 3, 0], (0, 255, 255)),
+    ([4, 5, 7, 6, 4], (255, 0, 255)),
+]
 
 
-def build_centers_by_id(corners, ids):
-    centers = {}
+def build_centers_by_id(corners, ids) -> dict[int, tuple[int, int]]:
+    centers: dict[int, tuple[int, int]] = {}
     for marker_corners, marker_id in zip(corners, ids.flatten()):
         pts = marker_corners.reshape(4, 2)
-        center = pts.mean(axis=0).astype(int)
-        centers[int(marker_id)] = (int(center[0]), int(center[1]))
+        cx, cy = pts.mean(axis=0).astype(int)
+        centers[int(marker_id)] = (int(cx), int(cy))
     return centers
 
 
@@ -48,9 +51,35 @@ def draw_workspace_paths(display, corners, ids):
             cv2.LINE_AA,
         )
 
-    draw_marker_path(display, centers_by_id, GROUP_A, color=(0, 255, 255), thickness=3)
-    draw_marker_path(display, centers_by_id, GROUP_B, color=(255, 0, 255), thickness=3)
+    for path_ids, color in PATHS:
+        draw_marker_path(display, centers_by_id, path_ids, color=color, thickness=3)
 
+    return display
+
+
+def _load_calibration_if_enabled(use_calibration: bool, calibration_file: Path | None):
+    if not use_calibration or calibration_file is None:
+        return None
+    calib = load_camera_calibration(calibration_file)
+    if calib is not None:
+        print(f"Using lens calibration from '{calibration_file}'")
+    else:
+        print(f"No valid calibration at '{calibration_file}' — running without undistort")
+    return calib
+
+
+def _process_frame(frame, detector, calib):
+    if calib is not None:
+        mtx, dist, calib_wh = calib
+        frame = undistort_bgr_frame(frame, mtx, dist, calib_wh)
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    corners, ids, _ = detector.detectMarkers(gray)
+
+    display = frame.copy()
+    if ids is not None and len(ids) > 0:
+        display = aruco.drawDetectedMarkers(display, corners, ids)
+        display = draw_workspace_paths(display, corners, ids)
     return display
 
 
@@ -62,17 +91,10 @@ def detect_markers_from_camera(
     use_calibration: bool = True,
 ) -> int:
     """Live ArUco detection. Loads camera.yml for lens undistortion when present."""
-    calib = None
-    if use_calibration and calibration_file is not None:
-        calib = load_camera_calibration(calibration_file)
-        if calib is not None:
-            print(f"Using lens calibration from '{calibration_file}'")
-        else:
-            print(f"No valid calibration at '{calibration_file}' — running without undistort")
+    calib = _load_calibration_if_enabled(use_calibration, calibration_file)
 
     aruco_dict = aruco.getPredefinedDictionary(DICT)
-    params = aruco.DetectorParameters()
-    detector = aruco.ArucoDetector(aruco_dict, params)
+    detector = aruco.ArucoDetector(aruco_dict, aruco.DetectorParameters())
 
     with CameraService(
         index=camera_index,
@@ -83,19 +105,7 @@ def detect_markers_from_camera(
             ret, frame = cam.read()
             if not ret:
                 break
-
-            if calib is not None:
-                mtx, dist, calib_wh = calib
-                frame = undistort_bgr_frame(frame, mtx, dist, calib_wh)
-
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            corners, ids, _ = detector.detectMarkers(gray)
-
-            display = frame.copy()
-            if ids is not None and len(ids) > 0:
-                display = aruco.drawDetectedMarkers(display, corners, ids)
-                display = draw_workspace_paths(display, corners, ids)
-
+            display = _process_frame(frame, detector, calib)
             cv2.imshow("Aruco Detect", display)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break

@@ -51,73 +51,84 @@ class CameraService:
 
     def open(self, lock_focus: bool = True) -> None:
         try:
-            from picamera2 import Picamera2
-            from libcamera import controls
-
-            self._cam = Picamera2()
-            sensor_res = self._cam.sensor_resolution
-            main_size = self._output_size if self._output_size is not None else sensor_res
-
-            stream_kw = dict(
-                main={
-                    "format": "BGR888",
-                    "size": main_size,
-                },
-                raw={
-                    "size": sensor_res,
-                },
-                buffer_count=2,
-            )
-            if self._use_still_configuration:
-                config = self._cam.create_still_configuration(**stream_kw)
-            else:
-                config = self._cam.create_preview_configuration(**stream_kw)
-            self._cam.configure(config)
-            try:
-                main_cfg = self._cam.stream_configuration("main")
-                sz = main_cfg["size"]
-                self._configured_main_size = (int(sz[0]), int(sz[1]))
-            except (KeyError, TypeError, IndexError, ValueError):
-                self._configured_main_size = None
-            self._cam.start()
-
-            ctrl: dict = {}
-            if lock_focus:
-                ctrl.update({
-                    "AfMode": controls.AfModeEnum.Manual,
-                    # Dioptrien ≈ 1 / Abstand_sensor_zur_Arbeitsfläche_in_m (hier 20 cm → 5.0)
-                    "LensPosition": self._lens_position,
-                })
-            if self._exposure_value is not None:
-                ctrl["ExposureValue"] = float(self._exposure_value)
-            if self._ae_metering is not None:
-                metering = self._ae_metering.strip().lower()
-                modes = {
-                    "centre": controls.AeMeteringModeEnum.CentreWeighted,
-                    "center": controls.AeMeteringModeEnum.CentreWeighted,
-                    "spot": controls.AeMeteringModeEnum.Spot,
-                    "average": controls.AeMeteringModeEnum.Matrix,
-                    "matrix": controls.AeMeteringModeEnum.Matrix,
-                }
-                if metering not in modes:
-                    raise ValueError(
-                        f"ae_metering must be one of {sorted(modes)!r}, got {self._ae_metering!r}"
-                    )
-                ctrl["AeMeteringMode"] = modes[metering]
-            if ctrl:
-                self._cam.set_controls(ctrl)
-
+            self._open_picamera(lock_focus)
             self._fallback = False
-
-        except (ImportError, Exception):
-            self._cam = cv2.VideoCapture(self._index)
-            if not self._cam.isOpened():
-                raise RuntimeError(f"Could not open camera {self._index}")
-            if self._output_size is not None:
-                self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self._output_size[0])
-                self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self._output_size[1])
+        except Exception:
+            self._open_opencv_fallback()
             self._fallback = True
+
+    def _open_picamera(self, lock_focus: bool) -> None:
+        from picamera2 import Picamera2
+        from libcamera import controls
+
+        cam = Picamera2()
+        sensor_res = cam.sensor_resolution
+        main_size = self._output_size if self._output_size is not None else sensor_res
+
+        stream_kw = dict(
+            main={"format": "BGR888", "size": main_size},
+            raw={"size": sensor_res},
+            buffer_count=2,
+        )
+        if self._use_still_configuration:
+            config = cam.create_still_configuration(**stream_kw)
+        else:
+            config = cam.create_preview_configuration(**stream_kw)
+        cam.configure(config)
+
+        try:
+            sz = cam.stream_configuration("main")["size"]
+            self._configured_main_size = (int(sz[0]), int(sz[1]))
+        except (KeyError, TypeError, IndexError, ValueError):
             self._configured_main_size = None
+
+        cam.start()
+
+        ctrl = self._build_picamera_controls(controls, lock_focus)
+        if ctrl:
+            cam.set_controls(ctrl)
+
+        self._cam = cam
+
+    def _build_picamera_controls(self, controls, lock_focus: bool) -> dict:
+        ctrl: dict = {}
+        if lock_focus:
+            ctrl.update({
+                "AfMode": controls.AfModeEnum.Manual,
+                # Dioptrien ≈ 1 / Abstand_sensor_zur_Arbeitsfläche_in_m (hier 20 cm → 5.0)
+                "LensPosition": self._lens_position,
+            })
+        if self._exposure_value is not None:
+            ctrl["ExposureValue"] = float(self._exposure_value)
+        if self._ae_metering is not None:
+            ctrl["AeMeteringMode"] = self._resolve_ae_metering(controls, self._ae_metering)
+        return ctrl
+
+    @staticmethod
+    def _resolve_ae_metering(controls, value: str):
+        modes = {
+            "centre": controls.AeMeteringModeEnum.CentreWeighted,
+            "center": controls.AeMeteringModeEnum.CentreWeighted,
+            "spot": controls.AeMeteringModeEnum.Spot,
+            "average": controls.AeMeteringModeEnum.Matrix,
+            "matrix": controls.AeMeteringModeEnum.Matrix,
+        }
+        key = value.strip().lower()
+        if key not in modes:
+            raise ValueError(
+                f"ae_metering must be one of {sorted(modes)!r}, got {value!r}"
+            )
+        return modes[key]
+
+    def _open_opencv_fallback(self) -> None:
+        cam = cv2.VideoCapture(self._index)
+        if not cam.isOpened():
+            raise RuntimeError(f"Could not open camera {self._index}")
+        if self._output_size is not None:
+            cam.set(cv2.CAP_PROP_FRAME_WIDTH, self._output_size[0])
+            cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self._output_size[1])
+        self._cam = cam
+        self._configured_main_size = None
 
     @property
     def configured_main_size(self) -> tuple[int, int] | None:
