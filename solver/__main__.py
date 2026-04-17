@@ -2,7 +2,7 @@ import sys
 
 import cv2
 
-from solver.logger import Logger
+from solver.debugger import Debugger
 from solver.puzzle import Puzzle
 from solver.uart_handler import UartHandler
 
@@ -12,18 +12,17 @@ def prod():
 	UartHandler(UART_PORT)
 
 def test():
-	Logger.enable_logs()
+	Debugger.enable()
 	UartHandler(UART_PORT)
 
 def debug(path: str):
-	Logger.enable_logs()
+	Debugger.enable()
 	image = cv2.imread(path)
 
 	if image is None:
 		raise FileNotFoundError(f"Image not found: {path}")
 
-	puzzle = Puzzle(image)
-	puzzle.solve()
+	Puzzle.solve(image)
 
 if __name__ == "__main__":
 	if len(sys.argv) >= 2:

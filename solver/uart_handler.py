@@ -1,7 +1,7 @@
 from typing import List
 
 from serial import Serial
-from solver.logger import Logger
+from solver.debugger import Debugger
 from solver.puzzle import Puzzle
 
 class UartHandler:
@@ -16,7 +16,7 @@ class UartHandler:
 
 	def listen(self):
 		while True:
-			Logger.log("Listening for messages...")
+			Debugger.log("Listening for messages...")
 
 			# blocks until message arrives
 			message = self.stream.readline()
@@ -25,13 +25,13 @@ class UartHandler:
 				decoded = message.decode('utf-8').strip()
 
 				if decoded == 'ready':
-					Logger.log("Received ready")
+					Debugger.log("Received ready")
 					self.__on_ready()
 				elif decoded == 'error':
-					Logger.log("Received error")
+					Debugger.log("Received error")
 					self.__on_error()
 				else:
-					Logger.log(f"Received unknown message {decoded}")
+					Debugger.log(f"Received unknown message {decoded}")
 
 	def __on_ready(self):
 		if len(self.messages) <= 0:
@@ -49,7 +49,7 @@ class UartHandler:
 
 	# restart the handler
 	def __on_error(self):
-		Logger.log("System abort triggered")
+		Debugger.log("System abort triggered")
 
 		# clear state
 		self.messages = []
@@ -62,15 +62,14 @@ class UartHandler:
 		self.listen()
 
 	def __send(self, message: str):
-		Logger.log(f"Sending {message}")
+		Debugger.log(f"Sending {message}")
 		self.stream.write(message.encode('utf-8'))
 
 	def __solve(self):
 		# TODO capture image
 		image = None
 
-		puzzle = Puzzle(image)
-		pieces = puzzle.solve()
+		pieces = Puzzle.solve(image)
 
 		if len(pieces) <= 0:
 			return

@@ -7,6 +7,8 @@ from shapely import Polygon
 from solver.debugger import Debugger
 from solver.constants import *
 
+ROUGHENING_TOLERANCE = 1.5
+
 class ContourDetector:
 	@staticmethod
 	def detect(image) -> List[Polygon]:
@@ -48,7 +50,7 @@ class ContourDetector:
 
 			Debugger.log(f"[THRESHOLD={threshold}]\t[SCORE={score:.3f}]\tFound {len(polygons)} pieces with {[len(polygon.exterior.coords) for polygon in polygons]} points")
 
-		Debugger.log(f"Best score is {best_score}")
+		Debugger.log(f"Best score is {best_score}\n")
 
 		return best_result
 
@@ -67,7 +69,7 @@ class ContourDetector:
 
 				polygon = Polygon(points)
 				# roughen shape for better performance
-				polygon = polygon.simplify(1.5, preserve_topology=True)
+				polygon = polygon.simplify(ROUGHENING_TOLERANCE, preserve_topology=True)
 
 				if polygon.is_valid and polygon.area >= PIECE_MIN_AREA_PIXEL:
 					polygons.append(polygon)
