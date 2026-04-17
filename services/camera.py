@@ -7,12 +7,16 @@ class CameraService:
     """
     Abstracts camera access: uses Picamera2 on Raspberry Pi,
     falls back to cv2.VideoCapture for local development.
+
+    Pass ``output_size=None`` for the sensor's maximum resolution (sharpest main stream;
+    higher load than 1080p). ``camera_params.undistort_bgr_frame`` scales intrinsics when
+    the live frame size differs from ``camera.yml``.
     """
 
     def __init__(
         self,
         index: int = 0,
-        output_size: tuple[int, int] = (1920, 1080),
+        output_size: tuple[int, int] | None = (1920, 1080),
         square_crop: bool = False,
         *,
         lens_position: float = 4.347826087,
@@ -21,6 +25,7 @@ class CameraService:
         ae_metering: str | None = "spot",
     ):
         self._index = index
+        # None = use full sensor resolution (Picamera2); sharpest, more CPU/RAM than 1080p.
         self._output_size = output_size
         self._square_crop = square_crop
         self._lens_position = lens_position
@@ -37,11 +42,12 @@ class CameraService:
 
             self._cam = Picamera2()
             sensor_res = self._cam.sensor_resolution
+            main_size = self._output_size if self._output_size is not None else sensor_res
 
             config = self._cam.create_preview_configuration(
                 main={
                     "format": "BGR888",
-                    "size": self._output_size,
+                    "size": main_size,
                 },
                 raw={
                     "size": sensor_res,
@@ -83,6 +89,9 @@ class CameraService:
             self._cam = cv2.VideoCapture(self._index)
             if not self._cam.isOpened():
                 raise RuntimeError(f"Could not open camera {self._index}")
+            if self._output_size is not None:
+                self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self._output_size[0])
+                self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self._output_size[1])
             self._fallback = True
 
     def read(self) -> tuple[bool, np.ndarray]:

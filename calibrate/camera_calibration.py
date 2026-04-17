@@ -22,6 +22,7 @@ def take_photos_from_camera(
     output_dir: Path = PHOTOS_DIR,
     max_photos: int = 25,
     interval: float = 3.0,
+    output_size: tuple[int, int] | None = None,
 ) -> int:
     if output_dir.exists():
         shutil.rmtree(output_dir)
@@ -32,9 +33,15 @@ def take_photos_from_camera(
 
     print(f"Saving {max_photos} photos to '{output_dir}' every {interval}s. Press 'q' to stop early.")
 
-    with CameraService() as cam:
+    # output_size None = full sensor (Picamera2); pass e.g. (1920, 1080) for smaller/faster captures.
+    with CameraService(output_size=output_size) as cam:
+        logged_size = False
         while frame_count < max_photos:
             _, frame = cam.read()
+            if not logged_size:
+                h, w = frame.shape[:2]
+                print(f"  Resolution: {w}x{h}.")
+                logged_size = True
             curr_time = time.time()
             if curr_time - last_recorded_time >= interval:
                 path = output_dir / f"frame_{frame_count:03d}.png"

@@ -44,7 +44,7 @@ LensPosition = 1 / 0.20 = 5.0
 | Parameter | Standard | Beschreibung |
 |---|---|---|
 | `index` | `0` | Kamera-Index (nur cv2-Fallback) |
-| `output_size` | `(1920, 1080)` | Ausgabeauflösung |
+| `output_size` | `(1920, 1080)` | Ausgabeauflösung; `None` = volle Sensorauflösung (Picamera2), mehr Pixel, höhere Last |
 | `square_crop` | `False` | Quadratischen Mittelschnitt aktivieren |
 | `lens_position` | `5.0` | Manuelle Fokus-Position in Dioptrien (`1/m`); Standard für **20 cm** Abstand zur Arbeitsfläche |
 | `picamera_rgb_buffer` | `True` | Nach `capture_array()` von RGB→BGR wandeln (Picamera2 liefert oft RGB-Reihenfolge; sonst wirken Hauttöne bläulich) |
@@ -107,9 +107,12 @@ uv run python -m calibrate <command>
 
 ```bash
 uv run python -m calibrate take-photos
+# optional feste Auflösung statt voller Sensor:
+# uv run python -m calibrate take-photos --size 1920x1080
 ```
 
 - Löscht alle vorhandenen Fotos im Ordner `data/calibration/photos/` beim Start
+- Standard: **volle Sensorauflösung** (Picamera2) für schärfere Kalibrierfotos; mit `--size WxH` z. B. 1080p
 - Zeigt Live-Vorschau, speichert automatisch alle **3 Sekunden** ein Foto
 - Stoppt automatisch nach **25 Fotos** (Standard)
 - Manueller Abbruch jederzeit mit `q`

@@ -1,4 +1,5 @@
 import argparse
+import sys
 from pathlib import Path
 
 from calibrate.aruco_generator import generate_markers
@@ -22,7 +23,16 @@ def main() -> int:
 		default=Path("camera.yml"),
 		help="Path to camera.yml (default: ./camera.yml)",
 	)
-	subparsers.add_parser("take-photos", help="Take chessboard photos for calibration (every 2s)")
+	subparsers_take = subparsers.add_parser(
+		"take-photos",
+		help="Take chessboard photos for calibration (every 2s)",
+	)
+	subparsers_take.add_argument(
+		"--size",
+		metavar="WxH",
+		default=None,
+		help="Frame size e.g. 1920x1080. Default: full sensor resolution (Picamera2).",
+	)
 	subparsers.add_parser("calibrate", help="Calibrate camera from saved chessboard photos")
 
 	args = parser.parse_args()
@@ -37,7 +47,14 @@ def main() -> int:
 		)
 
 	if args.command == "take-photos":
-		return take_photos_from_camera()
+		out_wh = None
+		if args.size:
+			parts = args.size.lower().replace("*", "x").split("x")
+			if len(parts) != 2:
+				print("Invalid --size: use WxH, e.g. 1920x1080", file=sys.stderr)
+				return 1
+			out_wh = (int(parts[0]), int(parts[1]))
+		return take_photos_from_camera(output_size=out_wh)
 
 	if args.command == "calibrate":
 		return calibrate_from_photos()
