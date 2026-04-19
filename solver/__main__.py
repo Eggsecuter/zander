@@ -12,17 +12,22 @@ def prod():
 	UartHandler(UART_PORT)
 
 def test():
-	Debugger.enable()
+	Debugger.enable_log()
 	UartHandler(UART_PORT)
 
 def debug(path: str):
-	Debugger.enable()
+	Debugger.enable_log()
+	Debugger.enable_plot()
+
 	image = cv2.imread(path)
 
 	if image is None:
 		raise FileNotFoundError(f"Image not found: {path}")
 
-	Puzzle.solve(image)
+	pieces = Puzzle.solve(image)
+
+	for message in UartHandler.get_piece_messages(pieces):
+		Debugger.log(message)
 
 if __name__ == "__main__":
 	if len(sys.argv) >= 2:

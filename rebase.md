@@ -1,26 +1,6 @@
 # Rebase algorithm
 Solver 2.0
 
-## Main
-Debug - Show images of each step
-Test - Show image of step then send via UART
-Prod - Only UART
-
-## ShapeDetection (with image loader)
-- Crop image to A4 area
-- Grayscale (maybe also account for color -> make everything black except white)
-- Blurred
-- Threshold
-- Roughen the shape
-- Account for puzzle piece height 6mm (homography)
-
-**Do the above with different thresholds and take the best option**
-- Area of all shapes should add up to A5 area
-- Shape count should be 4 or 6
-
-## PieceDetection
-- Check biggest colinearities
-
 # Matcher
 - Try each combination of piece and edge placements
 - Before placing the next edge check if

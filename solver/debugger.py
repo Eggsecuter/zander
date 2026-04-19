@@ -1,48 +1,54 @@
-import os
-from typing import List
-
 from shapely import Point
+from shapely.geometry import box
 from solver.plot import Plot
 from solver.constants import *
 
 
 class Debugger:
-	__enabled: bool = False
+	__log_enabled: bool = False
+	__plot_enabled: bool = False
 
 	@staticmethod
-	def enable():
-		Debugger.__enabled = True
+	def enable_log():
+		Debugger.__log_enabled = True
+
+	@staticmethod
+	def enable_plot():
+		Debugger.__plot_enabled = True
 
 	@staticmethod
 	def log(message: str):
-		if not Debugger.__enabled:
+		if not Debugger.__log_enabled:
 			return
 
 		print(message)
 
 	@staticmethod
 	def plot(image, pieces):
-		if not Debugger.__enabled:
+		if not Debugger.__plot_enabled:
 			return
 
-		if os.name != "nt":
-			if "DISPLAY" not in os.environ:
-				return
+		solved_color=(0, 150, 255)
 
-		try:
-			plot = Plot()
-			plot.addImage(image)
+		plot = Plot()
+		plot.add_image(image, PIXEL_TO_MICROMETER_FACTOR, A4_OFFSET_LEFT_MICROMETER - A4_OFFSET_LEFT_PIXEL * PIXEL_TO_MICROMETER_FACTOR, A4_OFFSET_TOP_MICROMETER - A4_OFFSET_TOP_PIXEL * PIXEL_TO_MICROMETER_FACTOR)
 
-			plot.addPoint(Point((A4_OFFSET_LEFT_PIXEL, A4_OFFSET_TOP_PIXEL)))
-			plot.addPoint(Point((A4_OFFSET_LEFT_PIXEL + A4_WIDTH_MICROMETER / PIXEL_TO_MICROMETER_FACTOR, A4_OFFSET_TOP_PIXEL + A4_HEIGHT_MICROMETER / PIXEL_TO_MICROMETER_FACTOR)))
+		frame = box(A4_OFFSET_LEFT_MICROMETER, A4_OFFSET_TOP_MICROMETER, A4_OFFSET_LEFT_MICROMETER + A4_WIDTH_MICROMETER, A4_OFFSET_TOP_MICROMETER + A4_HEIGHT_MICROMETER)
+		plot.add_polygon(frame)
 
-			for piece in pieces:
-				plot.addPolygon(piece.polygon, thickness=5)
-				plot.addPoint(piece.polygon.centroid)
+		# plot A5 frame
+		frame = box(A5_OFFSET_LEFT_MICROMETER, A5_OFFSET_TOP_MICROMETER, A5_OFFSET_LEFT_MICROMETER + A5_WIDTH_MICROMETER, A5_OFFSET_TOP_MICROMETER + A5_HEIGHT_MICROMETER)
+		plot.add_polygon(frame, color=solved_color)
 
-				for edge in piece.edges:
-					plot.addLine(edge, color=(255, 0, 0), thickness=3)
+		for piece in pieces:
+			plot.add_polygon(piece.polygon)
+			plot.add_point(piece.polygon.centroid)
 
-			plot.show()
-		except:
-			return
+			for edge in piece.edges:
+				plot.add_line(edge)
+
+			if piece.is_placed:
+				plot.add_polygon(piece.placed_piece.polygon, color=solved_color)
+				plot.add_point(piece.placed_piece.polygon.centroid)
+
+		plot.show()

@@ -4,12 +4,28 @@ import cv2
 from serial import Serial
 from solver.constants import *
 from solver.debugger import Debugger
+from solver.models.piece import Piece
 from solver.puzzle import Puzzle
 
 
 class UartHandler:
 	stream: Serial
 	messages: List[str] = []
+
+	@staticmethod
+	def get_piece_messages(pieces: List[Piece]) -> List[str]:
+		messages: List[str] = []
+
+		for piece in pieces:
+			if not piece.is_placed:
+				continue
+
+			messages.append(f"move|x={int(piece.polygon.centroid.x)}|y={int(piece.polygon.centroid.y)}|rot=0")
+			messages.append(f"pick")
+			messages.append(f"move|x={int(piece.placed_piece.polygon.centroid.x)}|y={int(piece.placed_piece.polygon.centroid.y)}|rot={int(piece.placed_piece.rotation_degrees * ROTATION_ACCURACY)}")
+			messages.append(f"place")
+
+		return messages
 
 	def __init__(self, port: str, baudrate: int = 115200):
 		self.stream = Serial(port, baudrate)
@@ -66,7 +82,7 @@ class UartHandler:
 
 	def __send(self, message: str):
 		Debugger.log(f"Sending {message}")
-		self.stream.write(message.encode('utf-8'))
+		self.stream.write("message\n".encode('utf-8'))
 
 	def __solve(self):
 		# TODO capture image
@@ -78,16 +94,7 @@ class UartHandler:
 			return
 
 		# create message list
-		for piece in pieces:
-			self.messages.append(
-				f"move|x={int(piece.polygon.centroid.x)}|y={int(piece.polygon.centroid.y)}|rot=0\n"
-			)
-			self.messages.append(f"pick\n")
-			# self.messages.append(
-			# 	f"move|x={int(piece.placedPiece.polygon.centroid.x)}|y={int(piece.placedPiece.polygon.centroid.y)}|rot={int(piece.placedPiece.rotation * ROTATION_ACCURACY)}\n"
-			# )
-			self.messages.append(f"place\n")
-
-		self.messages.append("finish\n")
+		self.messages.extend(UartHandler.get_piece_messages(pieces))
+		self.messages.append("finish")
 
 		Debugger.log(self.messages)

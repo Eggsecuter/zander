@@ -1,136 +1,89 @@
+from typing import List
+
 import cv2
 import numpy as np
-from shapely import LineString, Point
-from shapely.geometry import Polygon
+from shapely import LineString, Point, Polygon
+from shapely.affinity import scale, translate
+
+IMAGE_SCALE = 0.003
+PICKER_ORIGIN_OFFSET_MM = (int(80000 * IMAGE_SCALE), int(80000 * IMAGE_SCALE))
+PICKER_PLANE_MM = (int(350000 * IMAGE_SCALE), int(350000 * IMAGE_SCALE))
 
 class Plot:
 	def __init__(self, window_name="Plot"):
 		self.window_name = window_name
-		self.items = []
+		self.canvas = np.ones((PICKER_PLANE_MM[0] + PICKER_ORIGIN_OFFSET_MM[0], PICKER_PLANE_MM[1] + PICKER_ORIGIN_OFFSET_MM[1], 3), dtype=np.uint8) * 255  # white background
 
-	def addImage(self, image):
-		if image is None:
-			raise ValueError("Image cannot be None")
+	def add_image(self, image, scale: float, offsetX: int, offsetY: int):
+		scale *= IMAGE_SCALE
+		image = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
 
-		self.items.append({
-			"image": self.__ensure_bgr(image),
-			"polygons": [],
-			"points": [],
-			"lines": []
-		})
+		offsetX = int(offsetX * IMAGE_SCALE) + PICKER_ORIGIN_OFFSET_MM[0]
+		offsetY = int(offsetY * IMAGE_SCALE) + PICKER_ORIGIN_OFFSET_MM[1]
 
-	def addPolygon(self, polygon: Polygon, color=(0, 255, 0), thickness=2 , image_index=-1):
-		if not self.items:
-			raise RuntimeError("Add an image before adding polygons.")
+		canvas_h, canvas_w = self.canvas.shape[:2]
+		img_h, img_w = image.shape[:2]
 
-		if not isinstance(polygon, Polygon):
-			raise TypeError("polygon must be a shapely.geometry.Polygon")
+		# Source and destination start positions
+		src_x0 = max(0, -offsetX)
+		src_y0 = max(0, -offsetY)
 
-		# store on selected image (default last)
-		target = self.items[image_index]
-		target["polygons"].append({
-			"polygon": polygon,
-			"color": color,
-			"thickness": thickness
-		})
+		dst_x0 = max(0, offsetX)
+		dst_y0 = max(0, offsetY)
 
-	def addPoint(self, point: Point, color=(0, 0, 255), radius=5, image_index=-1):
-		if not self.items:
-			raise RuntimeError("Add an image before adding points.")
+		# Remaining space in canvas from destination point
+		dst_w = canvas_w - dst_x0
+		dst_h = canvas_h - dst_y0
 
-		target = self.items[image_index]
-		target["points"].append({
-			"point": point,
-			"color": color,
-			"radius": radius
-		})
+		# Corresponding remaining image size from source point
+		src_w = img_w - src_x0
+		src_h = img_h - src_y0
 
-	def addLine(self, line: LineString, color=(255, 0, 0), thickness=2, arrow=True, image_index=-1):
-		if not self.items:
-			raise RuntimeError("Add an image before adding lines.")
+		# Final overlap size
+		w = min(dst_w, src_w)
+		h = min(dst_h, src_h)
 
-		if not isinstance(line, LineString):
-			raise TypeError("line must be a shapely.geometry.LineString")
+		if w <= 0 or h <= 0:
+			return  # nothing visible on canvas
 
-		target = self.items[image_index]
-		target.setdefault("lines", []).append({
-			"line": line,
-			"color": color,
-			"thickness": thickness,
-			"arrow": arrow
-		})
+		cropped = image[src_y0:src_y0 + h, src_x0:src_x0 + w]
 
-	def __ensure_bgr(self, img):
-		if len(img.shape) == 2:
-			return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-		if img.shape[2] == 1:
-			return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-		return img
+		self.canvas[dst_y0:dst_y0 + h, dst_x0:dst_x0 + w] = cropped
 
-	def __draw_polygon(self, img, polygon, color, thickness):
-		# exterior coords
-		coords = np.array(list(polygon.exterior.coords), dtype=np.int32)
-		cv2.polylines(img, [coords], isClosed=True, color=color, thickness=thickness)
-
-		# holes (if any)
-		for interior in polygon.interiors:
-			hole = np.array(list(interior.coords), dtype=np.int32)
-			cv2.polylines(img, [hole], isClosed=True, color=(0, 0, 255), thickness=thickness)
-
-	def __draw_point(self, img, point, color, radius):
+	def add_point(self, point: Point, radius=3, color=(0, 0, 255)):
+		point = translate(scale(point, IMAGE_SCALE, IMAGE_SCALE, 1, (0, 0)),  PICKER_ORIGIN_OFFSET_MM[0], PICKER_ORIGIN_OFFSET_MM[1])
 		x, y = int(point.x), int(point.y)
-		cv2.circle(img, (x, y), radius, color, -1)
 
-	def __draw_line(self, img, line, color, thickness, arrow):
+		cv2.circle(self.canvas, (x, y), radius, color, -1)
+
+	def add_line(self, line: LineString, color=(255, 0, 0), thickness=2):
+		line = translate(scale(line, IMAGE_SCALE, IMAGE_SCALE, 1, (0, 0)),  PICKER_ORIGIN_OFFSET_MM[0], PICKER_ORIGIN_OFFSET_MM[1])
 		coords = list(line.coords)
 
 		if len(coords) < 2:
 			return
 
-		pts = np.array(coords, dtype=np.int32)
+		points = np.array(coords, dtype=np.int32)
 
-		# Draw polyline
-		cv2.polylines(img, [pts], isClosed=False, color=color, thickness=thickness)
+		cv2.polylines(self.canvas, [points], isClosed=False, color=color, thickness=thickness)
 
-		# Draw arrow on last segment
-		if arrow:
-			p1 = pts[-2]
-			p2 = pts[-1]
+		point1 = points[-2]
+		point2 = points[-1]
 
-			cv2.arrowedLine(
-				img,
-				tuple(p1),
-				tuple(p2),
-				color,
-				thickness,
-				tipLength=0.1  # adjust arrow size
-			)
+		cv2.arrowedLine(self.canvas, tuple(point1), tuple(point2), color, thickness, tipLength=0.1)
 
-	def show(self, wait=True, resize=None):
-		for i, item in enumerate(self.items):
-			img = item["image"].copy()
+	def add_polygon(self, polygon: Polygon, color=(0, 255, 0), thickness=2):
+		polygon = translate(scale(polygon, IMAGE_SCALE, IMAGE_SCALE, 1, (0, 0)),  PICKER_ORIGIN_OFFSET_MM[0], PICKER_ORIGIN_OFFSET_MM[1])
+		coords = np.array(list(polygon.exterior.coords), dtype=np.int32)
 
-			for polygon in item["polygons"]:
-				self.__draw_polygon(img, polygon["polygon"], polygon["color"], polygon["thickness"])
+		cv2.polylines(self.canvas, [coords], isClosed=True, color=color, thickness=thickness)
 
-			for point in item["points"]:
-				self.__draw_point(img, point["point"], point["color"], point["radius"])
+	def show(self):
+		# draw offset lines
+		x0, y0 = PICKER_ORIGIN_OFFSET_MM
+		w, h = PICKER_PLANE_MM
+		cv2.rectangle(self.canvas, (x0, y0), (x0 + w, y0 + h), (0, 0, 255), thickness=1)
 
-			for line in item["lines"]:
-				self.__draw_line(
-					img,
-					line["line"],
-					line["color"],
-					line["thickness"],
-					line["arrow"]
-				)
-
-			if resize is not None:
-				img = cv2.resize(img, resize)
-
-			window = f"{self.window_name}_{i}" if len(self.items) > 1 else self.window_name
-			cv2.imshow(window, img)
-
-		if wait:
-			cv2.waitKey(0)
-			cv2.destroyAllWindows()
+		cv2.imshow(self.window_name, self.canvas)
+		cv2.waitKey(0)
+		cv2.destroyAllWindows()

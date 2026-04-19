@@ -1,5 +1,7 @@
 import time
 from typing import List
+
+import cv2
 from solver.debugger import Debugger
 
 from solver.models.piece import Piece
@@ -15,6 +17,9 @@ class Puzzle:
 	def solve(image) -> List[Piece]:
 		if image is None:
 			raise FileNotFoundError(f"No image loaded to solve")
+
+		# for easier coordination rotate image by 180 degrees
+		image = cv2.flip(image, -1)
 
 		total_start_time = time.time()
 
