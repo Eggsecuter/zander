@@ -2,6 +2,7 @@ import copy
 import math
 from typing import List, Optional
 from shapely import Point
+from shapely.ops import unary_union
 from solver.debugger import Debugger
 from solver.models.piece import Piece
 from solver.models.solution import Solution
@@ -41,11 +42,12 @@ class Matcher:
 			score = self.__score_solution()
 
 			# potentially replace with new best solution
-			if self.__best_solution is None or score < self.__best_solution.score:
-				self.__best_solution = Solution(
-					copy.deepcopy(self.__pieces),
-					score
-				)
+			if score < float("inf"):
+				if self.__best_solution is None or score < self.__best_solution.score:
+					self.__best_solution = Solution(
+						copy.deepcopy(self.__pieces),
+						score
+					)
 
 			return
 
@@ -85,5 +87,31 @@ class Matcher:
 		if any(piece.placed_piece is None for piece in self.__pieces):
 			return float("inf")
 
-		# TODO: implement real scoring logic
-		return 0.0
+		polygons = [piece.placed_piece.polygon for piece in self.__pieces if piece.placed_piece is not None]
+
+		# get total overlap area
+		sum_area = sum(polygon.area for polygon in polygons)
+		union_area = unary_union(polygons).area
+
+		overlap_area = sum_area - union_area
+
+		# get size difference
+		points = [
+			(x, y)
+			for poly in polygons
+			for x, y in list(poly.exterior.coords[:-1])
+		]
+
+		x_sum = [x for x, _ in points]
+		y_sum = [y for _, y in points]
+
+		min_x, max_x = min(x_sum), max(x_sum)
+		min_y, max_y = min(y_sum), max(y_sum)
+
+		width = max_x - min_x
+		height = max_y - min_y
+
+		bounding_area = width * height
+		size_difference = abs(bounding_area - A5_AREA_PIXEL)
+
+		return overlap_area + size_difference

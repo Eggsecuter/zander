@@ -30,8 +30,6 @@ class ContourDetector:
 		best_score = float("inf")
 		best_result: List[Polygon] = None
 
-		target_area = ContourDetector.__get_target_area()
-
 		for threshold in range(20, 105, 5):
 			_, threshold_image = cv2.threshold(gaussian_image, threshold, 255, cv2.THRESH_BINARY_INV)
 			kernel = np.ones((3,3), np.uint8)
@@ -42,7 +40,7 @@ class ContourDetector:
 			contours, _ = cv2.findContours(threshold_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 			polygons = ContourDetector.__to_polygons(contours)
 
-			score = ContourDetector.__rate_solution(polygons, target_area)
+			score = ContourDetector.__rate_solution(polygons, A5_AREA_PIXEL)
 
 			if score < best_score:
 				best_score = score
@@ -53,10 +51,6 @@ class ContourDetector:
 		Debugger.log(f"Best score is {best_score}\n")
 
 		return best_result
-
-	@staticmethod
-	def __get_target_area() -> float:
-		return A5_WIDTH_MICROMETER * A5_HEIGHT_MICROMETER / PIXEL_TO_MICROMETER_FACTOR
 
 	@staticmethod
 	def __to_polygons(contours: Sequence[MatLike]) -> List[Polygon]:
