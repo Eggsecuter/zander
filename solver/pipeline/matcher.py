@@ -7,6 +7,7 @@ from solver.models.piece import Piece
 from solver.models.solution import Solution
 from solver.constants import *
 
+
 class Matcher:
 	def __init__(self, pieces: List[Piece]):
 		self.__pieces = pieces
