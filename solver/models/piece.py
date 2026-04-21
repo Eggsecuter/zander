@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import List, Optional
 from shapely import LineString, Polygon
 from shapely.geometry.point import Point
 from shapely.affinity import rotate, translate
@@ -8,16 +8,13 @@ from solver.models.placed_piece import PlacedPiece
 
 
 class Piece:
-	@property
-	def is_placed(self) -> bool:
-		return self.placed_piece is not None
-
 	def __init__(self, polygon: Polygon, edges: List[LineString]):
 		self.polygon = polygon
 		self.edges = edges
+		self.placed_piece: Optional[PlacedPiece] = None
 
-	def place(self, edgeIndex: int, cursor: Point, angle_degrees: float):
-		edge = self.edges[edgeIndex]
+	def place(self, edge_index: int, cursor: Point, angle_degrees: float):
+		edge = self.edges[edge_index]
 
 		# extract start and end of edge
 		startX, startY = edge.coords[0]

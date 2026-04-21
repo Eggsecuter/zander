@@ -17,7 +17,7 @@ class Debugger:
 		Debugger.__plot_enabled = True
 
 	@staticmethod
-	def log(message: str):
+	def log(message):
 		if not Debugger.__log_enabled:
 			return
 
@@ -47,7 +47,7 @@ class Debugger:
 			for edge in piece.edges:
 				plot.add_line(edge)
 
-			if piece.is_placed:
+			if piece.placed_piece is not None:
 				plot.add_polygon(piece.placed_piece.polygon, color=solved_color)
 				plot.add_point(piece.placed_piece.polygon.centroid)
 

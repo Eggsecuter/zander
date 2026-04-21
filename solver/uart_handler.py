@@ -17,12 +17,15 @@ class UartHandler:
 		messages: List[str] = []
 
 		for piece in pieces:
-			if not piece.is_placed:
+			if piece.placed_piece is None:
 				continue
 
 			messages.append(f"move|x={int(piece.polygon.centroid.x)}|y={int(piece.polygon.centroid.y)}|rot=0")
 			messages.append(f"pick")
-			messages.append(f"move|x={int(piece.placed_piece.polygon.centroid.x)}|y={int(piece.placed_piece.polygon.centroid.y)}|rot={int(piece.placed_piece.rotation_degrees * ROTATION_ACCURACY)}")
+
+			if piece.placed_piece is not None:
+				messages.append(f"move|x={int(piece.placed_piece.polygon.centroid.x)}|y={int(piece.placed_piece.polygon.centroid.y)}|rot={int(piece.placed_piece.rotation_degrees * ROTATION_ACCURACY)}")
+
 			messages.append(f"place")
 
 		return messages
@@ -88,13 +91,13 @@ class UartHandler:
 		# TODO capture image
 		image = cv2.imread('./data/test-5.png')
 
-		pieces = Puzzle.solve(image)
+		solution = Puzzle.solve(image)
 
-		if len(pieces) <= 0:
+		if solution is None:
 			return
 
 		# create message list
-		self.messages.extend(UartHandler.get_piece_messages(pieces))
+		self.messages.extend(UartHandler.get_piece_messages(solution.pieces))
 		self.messages.append("finish")
 
 		Debugger.log(self.messages)

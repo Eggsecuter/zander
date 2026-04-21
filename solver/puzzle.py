@@ -1,22 +1,20 @@
 import time
-from typing import List
-
 import cv2
-from solver.debugger import Debugger
+from typing import Optional
 
-from solver.models.piece import Piece
+from solver.debugger import Debugger
+from solver.models.solution import Solution
 from solver.pipeline.contour_detector import ContourDetector
 from solver.pipeline.coordinate_system import CoordinateSystem
 from solver.pipeline.matcher import Matcher
 from solver.pipeline.piece_detector import PieceDetector
-from solver.constants import *
 
 
 class Puzzle:
 	@staticmethod
-	def solve(image) -> List[Piece]:
+	def solve(image) -> Optional[Solution]:
 		if image is None:
-			raise FileNotFoundError(f"No image loaded to solve")
+			raise FileNotFoundError("No image loaded to solve")
 
 		# for easier coordination rotate image by 180 degrees
 		image = cv2.flip(image, -1)
@@ -32,11 +30,11 @@ class Puzzle:
 		piece_delta_time = time.time() - match_start_time
 
 		match_start_time = time.time()
-		pieces = Matcher.match(pieces)
+		solution = Matcher(pieces).find_solution()
 		match_delta_time = time.time() - match_start_time
 
 		coordinate_start_time = time.time()
-		pieces = CoordinateSystem.correct(pieces)
+		CoordinateSystem.correct(solution)
 		coordinate_delta_time = time.time() - coordinate_start_time
 
 		total_delta_time = time.time() - total_start_time
@@ -47,6 +45,6 @@ class Puzzle:
 		Debugger.log(f"\tMatcher took {match_delta_time:.4f}s")
 		Debugger.log(f"\tCoordinate took {coordinate_delta_time:.4f}s")
 
-		Debugger.plot(image, pieces)
+		Debugger.plot(image, [] if solution is None else solution.pieces)
 
-		return pieces
+		return solution

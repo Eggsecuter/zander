@@ -24,10 +24,11 @@ def debug(path: str):
 	if image is None:
 		raise FileNotFoundError(f"Image not found: {path}")
 
-	pieces = Puzzle.solve(image)
+	solution = Puzzle.solve(image)
 
-	for message in UartHandler.get_piece_messages(pieces):
-		Debugger.log(message)
+	if solution is not None:
+		for message in UartHandler.get_piece_messages(solution.pieces):
+			Debugger.log(message)
 
 if __name__ == "__main__":
 	if len(sys.argv) >= 2:
