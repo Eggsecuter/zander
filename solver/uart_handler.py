@@ -1,7 +1,7 @@
 from typing import List
 
-import cv2
 from serial import Serial
+from services.camera import CameraService
 from solver.constants import *
 from solver.debugger import Debugger
 from solver.models.piece import Piece
@@ -88,8 +88,8 @@ class UartHandler:
 		self.stream.write("message\n".encode('utf-8'))
 
 	def __solve(self):
-		# TODO capture image
-		image = cv2.imread('./data/test-5.png')
+		with CameraService() as cam:
+			_, image = cam.read()
 
 		solution = Puzzle.solve(image)
 
