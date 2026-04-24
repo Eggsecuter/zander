@@ -29,7 +29,7 @@ class CameraService:
         output_size: tuple[int, int] | None = None,
         square_crop: bool = False,
         *,
-        lens_position: float = 4.347826087,
+        lens_position: float = 4.3859649123,
         picamera_rgb_buffer: bool = True,
         exposure_value: float | None = 1.09,
         ae_metering: str | None = "spot",
