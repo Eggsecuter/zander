@@ -44,6 +44,9 @@ class PieceDetector:
 
 			edges.append(edge)
 
+		# sort for performance
+		edges.sort(key=lambda edge: edge.length, reverse=True)
+
 		return edges
 
 	@staticmethod
