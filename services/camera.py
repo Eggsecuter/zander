@@ -123,7 +123,7 @@ class CameraService:
     def read(self) -> tuple[bool, np.ndarray]:
         """Returns (success, frame) — same interface as cv2.VideoCapture.read()."""
         frame = self._cam.capture_array()
-        # Trotz "BGR888" liefert Picamera2 oft RGB-Reihenfolge → Haut wirkt bläulich in OpenCV (BGR).
+
         if self._picamera_rgb_buffer:
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
