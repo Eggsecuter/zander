@@ -53,12 +53,16 @@ class CameraService:
         from libcamera import controls
 
         cam = Picamera2()
-        sensor_res = cam.sensor_resolution
-        main_size = self._output_size if self._output_size is not None else sensor_res
+        # cam.sensor_resolution kann auf IMX708 die gerade aktive (gebinnte) Mode-Größe zurückgeben
+        # statt der Sensor-Maximalauflösung → wir picken explizit den größten Sensor-Mode,
+        # sonst landen main + raw im 1536×864-Binning-Mode statt 4608×2592.
+        full_mode = max(cam.sensor_modes, key=lambda m: m["size"][0] * m["size"][1])
+        sensor_full_size = full_mode["size"]
+        main_size = self._output_size if self._output_size is not None else sensor_full_size
 
         config = cam.create_still_configuration(
             main={"format": "BGR888", "size": main_size},
-            raw={"size": sensor_res},
+            raw={"size": sensor_full_size},
             buffer_count=2,
         )
         cam.configure(config)
