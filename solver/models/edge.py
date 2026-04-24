@@ -1,60 +1,34 @@
 
 import math
-from dataclasses import dataclass
-from typing import List
-
-from solver.models.vector2 import Vector2
+from shapely import LineString
 
 
-@dataclass
 class Edge:
-	'''
-	Edges can have 2-5 points. This allows combined edges where we can automatically slide the cursor along all corners.
-	Combined edges also prevent trying to place edges where the left "connecting" edge also is a frame edge (which is not allowed).
-
-	The shape points of the "parent" also must be passed in and updated when translated or rotated that the edge can access point data and calculate various useful data.
-	'''
-	shape_points: List[Vector2]
-	point_indices: List[int]
+	@property
+	def startX(self) -> float:
+		return self.line.coords[0][0]
 
 	@property
-	def start(self):
-		return self.shape_points[self.point_indices[0]]
+	def startY(self) -> float:
+		return self.line.coords[0][1]
 
 	@property
-	def end(self):
-		return self.shape_points[self.point_indices[-1]]
+	def endX(self) -> float:
+		return self.line.coords[-1][0]
 
 	@property
-	def points(self):
-		return [self.shape_points[index] for index in self.point_indices]
+	def endY(self) -> float:
+		return self.line.coords[-1][1]
 
 	@property
-	def corner_count(self):
-		return len(self.points) - 2
+	def length(self) -> float:
+		return self.line.length
 
-	def get_length(self):
-		'''
-		Get complete length of all lines
-		'''
-		length: float = 0
+	@property
+	def angle_degrees(self) -> float:
+		# current angle of the edge (degrees)
+		return math.degrees(math.atan2(self.endY - self.startY, self.endX - self.startX))
 
-		for index in range(len(self.point_indices) - 1):
-			line_start = self.shape_points[self.point_indices[index]]
-			line_end = self.shape_points[self.point_indices[index + 1]]
-
-			length += line_end.distance_to(line_start)
-
-		return length
-
-	def get_start_angle(self):
-		'''
-		Get angle of first line (first two points) in edge
-		'''
-		return self.start.angle_to(self.shape_points[self.point_indices[1]])
-
-	def get_end_angle(self):
-		'''
-		Get angle of last line (last two points) in edge
-		'''
-		return self.shape_points[self.point_indices[-2]].angle_to(self.end)
+	def __init__(self, line: LineString, is_frame_edge: bool):
+		self.line = line
+		self.is_frame_edge = is_frame_edge
