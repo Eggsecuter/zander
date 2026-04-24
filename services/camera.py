@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 
 import cv2
@@ -10,38 +12,36 @@ RPI_CAMERA_MODULE3_IMX708_MAX_SIZE: tuple[int, int] = (4608, 2592)
 
 class CameraService:
     """
-    Picamera2-backed camera access (still configuration by default).
+    Picamera2-backed still-capture service — matches ``rpicam-still`` quality.
 
-    Uses **still** configuration by default (``create_still_configuration``): ISP tuned for
-    photo-style captures (e.g. higher noise reduction quality vs preview). Pass
-    ``use_still_configuration=False`` for ``create_preview_configuration`` if you need higher FPS.
+    Always uses ``create_still_configuration`` (still-ISP path). Every ``read()`` returns a
+    frame that went through the full still pipeline. After ``open()`` the service sleeps
+    ``warmup_time`` seconds so AE/AWB converge before the first capture.
 
-    Pass ``output_size=None`` to use Picamera2's ``sensor_resolution`` (for Camera Module 3 /
-    IMX708 typically **4608×2592**, same as :data:`RPI_CAMERA_MODULE3_IMX708_MAX_SIZE`).
-    That is the sharpest main stream; higher CPU/RAM use than 1080p.
-    ``camera_params.undistort_bgr_frame`` scales intrinsics when the live frame size differs
-    from ``camera.yml``.
+    Default ``output_size=None`` → Picamera2's ``sensor_resolution`` (for Camera Module 3 /
+    IMX708 typically **4608×2592**, see :data:`RPI_CAMERA_MODULE3_IMX708_MAX_SIZE`).
+    ``camera_params.undistort_bgr_frame`` scales intrinsics if ``camera.yml`` was recorded at
+    a different resolution.
     """
 
     def __init__(
         self,
-        output_size: tuple[int, int] | None = (1920, 1080),
+        output_size: tuple[int, int] | None = None,
         square_crop: bool = False,
         *,
-        use_still_configuration: bool = True,
         lens_position: float = 4.347826087,
         picamera_rgb_buffer: bool = True,
         exposure_value: float | None = 1.09,
         ae_metering: str | None = "spot",
+        warmup_time: float = 2.0,
     ):
-        # None = use full sensor resolution (Picamera2); sharpest, more CPU/RAM than 1080p.
         self._output_size = output_size
         self._square_crop = square_crop
         self._lens_position = lens_position
         self._picamera_rgb_buffer = picamera_rgb_buffer
         self._exposure_value = exposure_value
         self._ae_metering = ae_metering
-        self._use_still_configuration = use_still_configuration
+        self._warmup_time = warmup_time
         self._cam = None
         self._configured_main_size: tuple[int, int] | None = None
 
@@ -56,15 +56,11 @@ class CameraService:
         sensor_res = cam.sensor_resolution
         main_size = self._output_size if self._output_size is not None else sensor_res
 
-        stream_kw = dict(
+        config = cam.create_still_configuration(
             main={"format": "BGR888", "size": main_size},
             raw={"size": sensor_res},
             buffer_count=2,
         )
-        if self._use_still_configuration:
-            config = cam.create_still_configuration(**stream_kw)
-        else:
-            config = cam.create_preview_configuration(**stream_kw)
         cam.configure(config)
 
         try:
@@ -78,6 +74,10 @@ class CameraService:
         ctrl = self._build_picamera_controls(controls, lock_focus)
         if ctrl:
             cam.set_controls(ctrl)
+
+        # AE/AWB-Einschwingen vor dem ersten Capture (wie rpicam-still).
+        if self._warmup_time > 0:
+            time.sleep(self._warmup_time)
 
         self._cam = cam
 

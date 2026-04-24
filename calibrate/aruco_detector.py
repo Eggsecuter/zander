@@ -83,13 +83,24 @@ def _process_frame(frame, detector, calib):
     return display
 
 
+DISPLAY_MAX_WIDTH = 1600
+
+
+def _fit_for_display(frame, max_width: int = DISPLAY_MAX_WIDTH):
+    h, w = frame.shape[:2]
+    if w <= max_width:
+        return frame
+    scale = max_width / w
+    return cv2.resize(frame, (max_width, int(h * scale)), interpolation=cv2.INTER_AREA)
+
+
 def detect_markers_from_camera(
-    output_size: tuple[int, int] = (1920, 1080),
+    output_size: tuple[int, int] | None = None,
     square_crop: bool = False,
     calibration_file: Path | None = Path("camera.yml"),
     use_calibration: bool = True,
 ) -> int:
-    """Live ArUco detection. Loads camera.yml for lens undistortion when present."""
+    """ArUco detection on full-sensor still captures. Loads camera.yml for lens undistortion."""
     calib = _load_calibration_if_enabled(use_calibration, calibration_file)
 
     aruco_dict = aruco.getPredefinedDictionary(DICT)
@@ -100,11 +111,9 @@ def detect_markers_from_camera(
         square_crop=square_crop,
     ) as cam:
         while True:
-            ret, frame = cam.read()
-            if not ret:
-                break
+            _, frame = cam.read()
             display = _process_frame(frame, detector, calib)
-            cv2.imshow("Aruco Detect", display)
+            cv2.imshow("Aruco Detect", _fit_for_display(display))
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
