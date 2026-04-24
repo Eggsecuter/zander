@@ -72,7 +72,8 @@ class UartHandler:
 		# if reset is remaining send it manually
 		if len(self.messages) == 1 and self.messages[0] == RESET_COMMAND:
 			time.sleep(1)
-			self.__send(message)
+			self.__on_ready()
+			return
 
 		# listen to response
 		self.listen()
