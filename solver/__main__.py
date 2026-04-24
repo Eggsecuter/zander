@@ -13,6 +13,7 @@ def prod():
 
 def test():
 	Debugger.enable_log()
+	Debugger.enable_image_save()
 	UartHandler(UART_PORT)
 
 def debug(path: str):

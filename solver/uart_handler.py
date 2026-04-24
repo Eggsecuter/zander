@@ -1,6 +1,3 @@
-from random import randint
-import cv2
-
 from typing import List
 from serial import Serial
 from services.camera import CameraService
@@ -92,9 +89,7 @@ class UartHandler:
 	def __solve(self):
 		with CameraService() as cam:
 			_, image = cam.read()
-
-			if Debugger.__log_enabled:
-				cv2.imwrite(f"output-{randint(1000, 9999)}.png", image)
+			Debugger.save_image(image)
 
 		solution = Puzzle.solve(image)
 

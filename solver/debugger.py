@@ -1,4 +1,6 @@
+from random import randint
 from typing import List
+import cv2
 from shapely.geometry import box
 from solver.models.piece import Piece
 from solver.plot import Plot
@@ -8,6 +10,7 @@ from solver.constants import *
 class Debugger:
 	__log_enabled: bool = False
 	__plot_enabled: bool = False
+	__image_save_enabled: bool = False
 
 	@staticmethod
 	def enable_log():
@@ -16,6 +19,10 @@ class Debugger:
 	@staticmethod
 	def enable_plot():
 		Debugger.__plot_enabled = True
+
+	@staticmethod
+	def enable_image_save():
+		Debugger.__image_save_enabled = True
 
 	@staticmethod
 	def log(message):
@@ -63,3 +70,7 @@ class Debugger:
 					plot.add_line(edge.line, color=solved_color_edge)
 
 		plot.show()
+
+	@staticmethod
+	def save_image(image):
+		cv2.imwrite(f"output-{randint(1000, 9999)}.png", image)
