@@ -13,6 +13,8 @@ ROUGHENING_TOLERANCE = 1.5
 class ContourDetector:
 	@staticmethod
 	def detect(image) -> List[Polygon]:
+		Debugger.log("Detecting contours\n")
+
 		# crop image to A4 area
 		cropped_image = image[
 			A4_OFFSET_TOP_PIXEL : int(A4_OFFSET_TOP_PIXEL + A4_HEIGHT_MICROMETER / PIXEL_TO_MICROMETER_FACTOR),
@@ -49,7 +51,7 @@ class ContourDetector:
 
 			Debugger.log(f"[THRESHOLD={threshold}]\t[SCORE={score:.3f}]\tFound {len(polygons)} pieces with {[len(polygon.exterior.coords) for polygon in polygons]} points")
 
-		Debugger.log(f"Best score is {best_score}\n")
+		Debugger.log(f"Best score is {best_score}\n\n")
 
 		return best_result
 

@@ -43,7 +43,7 @@ class Puzzle:
 		Debugger.log(f"\tContour detector took {contour_delta_time:.4f}s")
 		Debugger.log(f"\tPiece detector took {piece_delta_time:.4f}s")
 		Debugger.log(f"\tMatcher took {match_delta_time:.4f}s")
-		Debugger.log(f"\tCoordinate took {coordinate_delta_time:.4f}s")
+		Debugger.log(f"\tCoordinate took {coordinate_delta_time:.4f}s\n\n")
 
 		Debugger.plot(image, [] if solution is None else solution.pieces)
 

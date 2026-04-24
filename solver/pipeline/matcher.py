@@ -22,17 +22,18 @@ class Matcher:
 		if len(self.__pieces) <= 0:
 			return
 
-		Debugger.log("Starting matching")
+		Debugger.log("Start matching")
 		self.__verbose = False
 		self.__run()
 
 		if self.__best_solution is None:
-			Debugger.log("No solution found - Starting verbose matching")
+			Debugger.log("No solution found")
+			Debugger.log("Start verbose matching")
 			self.__verbose = True
 			self.__run()
 
 		if self.__best_solution is None:
-			Debugger.log("Found no solution")
+			Debugger.log("Found no solution\n\n")
 		else:
 			Debugger.log(f"Found solution with score {self.__best_solution.score}\n\n")
 

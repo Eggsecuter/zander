@@ -27,6 +27,7 @@ def debug(path: str):
 	solution = Puzzle.solve(image)
 
 	if solution is not None:
+		Debugger.log("Uart messages:\n")
 		for message in UartHandler.get_piece_messages(solution.pieces):
 			Debugger.log(message)
 

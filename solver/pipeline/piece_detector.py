@@ -14,13 +14,15 @@ POLYGON_INTERSECT_SHRINK_FACTOR = -10
 class PieceDetector:
 	@staticmethod
 	def detect(polygons: List[Polygon]) -> List[Piece]:
+		Debugger.log("Detecting pieces\n")
+
 		pieces = []
 
 		for polygon in polygons:
 			edges = PieceDetector.__extract_edges(polygon)
 			pieces.append(Piece(polygon, edges))
 
-			Debugger.log(f"Piece with {len(polygon.exterior.coords)} points has {len(edges)} edges")
+			Debugger.log(f"Piece with {len(polygon.exterior.coords)} points has {len(edges)} edges [{len(list(filter(lambda edge: edge.is_frame_edge, edges)))} frame edges]")
 
 		Debugger.log("\n")
 
