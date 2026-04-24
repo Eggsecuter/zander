@@ -84,7 +84,6 @@ def _process_frame(frame, detector, calib):
 
 
 def detect_markers_from_camera(
-    camera_index: int = 0,
     output_size: tuple[int, int] = (1920, 1080),
     square_crop: bool = False,
     calibration_file: Path | None = Path("camera.yml"),
@@ -97,7 +96,6 @@ def detect_markers_from_camera(
     detector = aruco.ArucoDetector(aruco_dict, aruco.DetectorParameters())
 
     with CameraService(
-        index=camera_index,
         output_size=output_size,
         square_crop=square_crop,
     ) as cam:

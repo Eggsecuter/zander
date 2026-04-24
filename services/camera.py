@@ -10,8 +10,7 @@ RPI_CAMERA_MODULE3_IMX708_MAX_SIZE: tuple[int, int] = (4608, 2592)
 
 class CameraService:
     """
-    Abstracts camera access: uses Picamera2 on Raspberry Pi,
-    falls back to cv2.VideoCapture for local development.
+    Picamera2-backed camera access (still configuration by default).
 
     Uses **still** configuration by default (``create_still_configuration``): ISP tuned for
     photo-style captures (e.g. higher noise reduction quality vs preview). Pass
@@ -26,7 +25,6 @@ class CameraService:
 
     def __init__(
         self,
-        index: int = 0,
         output_size: tuple[int, int] | None = (1920, 1080),
         square_crop: bool = False,
         *,
@@ -36,7 +34,6 @@ class CameraService:
         exposure_value: float | None = 1.09,
         ae_metering: str | None = "spot",
     ):
-        self._index = index
         # None = use full sensor resolution (Picamera2); sharpest, more CPU/RAM than 1080p.
         self._output_size = output_size
         self._square_crop = square_crop
@@ -46,16 +43,10 @@ class CameraService:
         self._ae_metering = ae_metering
         self._use_still_configuration = use_still_configuration
         self._cam = None
-        self._fallback = False
         self._configured_main_size: tuple[int, int] | None = None
 
     def open(self, lock_focus: bool = True) -> None:
-        try:
-            self._open_picamera(lock_focus)
-            self._fallback = False
-        except Exception:
-            self._open_opencv_fallback()
-            self._fallback = True
+        self._open_picamera(lock_focus)
 
     def _open_picamera(self, lock_focus: bool) -> None:
         from picamera2 import Picamera2
@@ -120,36 +111,22 @@ class CameraService:
             )
         return modes[key]
 
-    def _open_opencv_fallback(self) -> None:
-        cam = cv2.VideoCapture(self._index)
-        if not cam.isOpened():
-            raise RuntimeError(f"Could not open camera {self._index}")
-        if self._output_size is not None:
-            cam.set(cv2.CAP_PROP_FRAME_WIDTH, self._output_size[0])
-            cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self._output_size[1])
-        self._cam = cam
-        self._configured_main_size = None
-
     @property
     def configured_main_size(self) -> tuple[int, int] | None:
-        """``(width, height)`` of the main stream after ``open()``, or ``None`` (fallback / not opened)."""
+        """``(width, height)`` of the main stream after ``open()``, or ``None`` (not opened)."""
         return self._configured_main_size
 
     def read(self) -> tuple[bool, np.ndarray]:
         """Returns (success, frame) — same interface as cv2.VideoCapture.read()."""
-        if self._fallback:
-            ok, frame = self._cam.read()
-        else:
-            frame = self._cam.capture_array()
-            ok = True
-            # Trotz "BGR888" liefert Picamera2 oft RGB-Reihenfolge → Haut wirkt bläulich in OpenCV (BGR).
-            if self._picamera_rgb_buffer:
-                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        frame = self._cam.capture_array()
+        # Trotz "BGR888" liefert Picamera2 oft RGB-Reihenfolge → Haut wirkt bläulich in OpenCV (BGR).
+        if self._picamera_rgb_buffer:
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-        if ok and self._square_crop:
+        if self._square_crop:
             frame = self._crop_square(frame)
 
-        return ok, frame
+        return True, frame
 
     @staticmethod
     def _crop_square(frame: np.ndarray) -> np.ndarray:
@@ -166,10 +143,7 @@ class CameraService:
     def release(self) -> None:
         if self._cam is None:
             return
-        if self._fallback:
-            self._cam.release()
-        else:
-            self._cam.stop()
+        self._cam.stop()
         self._cam = None
         self._configured_main_size = None
 
