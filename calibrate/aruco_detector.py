@@ -100,7 +100,7 @@ def detect_markers_from_camera(
     calibration_file: Path | None = Path("camera.yml"),
     use_calibration: bool = True,
 ) -> int:
-    """ArUco detection on full-sensor still captures. Loads camera.yml for lens undistortion."""
+    """Single high-quality capture → ArUco detection → show result. Any key closes the window."""
     calib = _load_calibration_if_enabled(use_calibration, calibration_file)
 
     aruco_dict = aruco.getPredefinedDictionary(DICT)
@@ -110,12 +110,10 @@ def detect_markers_from_camera(
         output_size=output_size,
         square_crop=square_crop,
     ) as cam:
-        while True:
-            _, frame = cam.read()
-            display = _process_frame(frame, detector, calib)
-            cv2.imshow("Aruco Detect", _fit_for_display(display))
-            if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
+        _, frame = cam.read()
 
+    display = _process_frame(frame, detector, calib)
+    cv2.imshow("Aruco Detect", _fit_for_display(display))
+    cv2.waitKey(0)
     cv2.destroyAllWindows()
     return 0
