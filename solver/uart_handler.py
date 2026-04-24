@@ -99,5 +99,6 @@ class UartHandler:
 		# create message list
 		self.messages.extend(UartHandler.get_piece_messages(solution.pieces))
 		self.messages.append("finish")
+		self.messages.append("reset")
 
 		Debugger.log(self.messages)
