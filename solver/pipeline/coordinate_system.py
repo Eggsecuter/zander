@@ -20,6 +20,9 @@ class CoordinateSystem:
 			if piece.placed_piece is not None:
 				piece.placed_piece.polygon = CoordinateSystem.__correct_A5(piece.placed_piece.polygon)
 
+				for edge in piece.placed_piece.edges:
+					edge.line = CoordinateSystem.__correct_A5(edge.line)
+
 	@staticmethod
 	def __correct_A4(geometry):
 		scaled = scale(geometry, PIXEL_TO_MICROMETER_FACTOR, PIXEL_TO_MICROMETER_FACTOR, 1, (0, 0))

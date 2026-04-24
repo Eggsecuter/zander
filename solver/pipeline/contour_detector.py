@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import List, Sequence, cast
 
 import cv2
 from cv2.typing import MatLike
@@ -6,6 +6,7 @@ import numpy as np
 from shapely import Polygon
 from solver.debugger import Debugger
 from solver.constants import *
+
 
 ROUGHENING_TOLERANCE = 1.5
 
@@ -63,7 +64,7 @@ class ContourDetector:
 
 				polygon = Polygon(points)
 				# roughen shape for better performance
-				polygon = polygon.simplify(ROUGHENING_TOLERANCE, preserve_topology=True)
+				polygon = cast(Polygon, polygon.simplify(ROUGHENING_TOLERANCE, preserve_topology=True))
 
 				if polygon.is_valid and polygon.area >= PIECE_MIN_AREA_PIXEL:
 					polygons.append(polygon)

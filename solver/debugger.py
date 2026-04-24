@@ -30,6 +30,7 @@ class Debugger:
 			return
 
 		solved_color=(0, 150, 255)
+		solved_color_edge=(255, 0, 255)
 
 		plot = Plot()
 		plot.add_image(image, PIXEL_TO_MICROMETER_FACTOR, A4_OFFSET_LEFT_MICROMETER - A4_OFFSET_LEFT_PIXEL * PIXEL_TO_MICROMETER_FACTOR, A4_OFFSET_TOP_MICROMETER - A4_OFFSET_TOP_PIXEL * PIXEL_TO_MICROMETER_FACTOR)
@@ -54,5 +55,11 @@ class Debugger:
 			if piece.placed_piece is not None:
 				plot.add_polygon(piece.placed_piece.polygon, color=solved_color)
 				plot.add_point(piece.placed_piece.polygon.centroid)
+
+				for edge in piece.placed_piece.edges:
+					if not edge.is_frame_edge:
+						continue
+
+					plot.add_line(edge.line, color=solved_color_edge)
 
 		plot.show()

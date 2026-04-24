@@ -3,6 +3,7 @@ from shapely import Polygon
 from shapely.geometry.point import Point
 from shapely.affinity import rotate, translate
 
+from solver.models.cursor import Cursor
 from solver.models.edge import Edge
 from solver.models.placed_piece import PlacedPiece
 
@@ -13,16 +14,26 @@ class Piece:
 		self.edges = edges
 		self.placed_piece: Optional[PlacedPiece] = None
 
-	def place(self, edge_index: int, cursor: Point, angle_degrees: float):
-		edge = self.edges[edge_index]
+	def place(self, edge_index: int, cursor: Cursor):
+		current_edge = self.edges[edge_index]
+		x_offset = cursor.point.x - current_edge.startX
+		y_offset = cursor.point.y - current_edge.startY
 
 		# rotation needed to match desired direction
-		rotation_degrees = angle_degrees - edge.angle_degrees
+		rotation_degrees = cursor.angle_degrees - current_edge.angle_degrees
 
-		rotated_polygon = rotate(self.polygon, rotation_degrees, origin=(edge.startX, edge.startY), use_radians=False)
-		placed_polygon = translate(rotated_polygon, cursor.x - edge.startX, cursor.y - edge.startY)
+		rotated_polygon = rotate(self.polygon, rotation_degrees, origin=(current_edge.startX, current_edge.startY), use_radians=False)
+		placed_polygon = translate(rotated_polygon, x_offset, y_offset)
 
-		self.placed_piece = PlacedPiece(placed_polygon, rotation_degrees)
+		placed_edges: List[Edge] = []
+
+		for edge in self.edges:
+			rotated_line = rotate(edge.line, rotation_degrees, origin=(current_edge.startX, current_edge.startY), use_radians=False)
+			placed_line = translate(rotated_line, x_offset, y_offset)
+
+			placed_edges.append(Edge(placed_line, edge.is_frame_edge))
+
+		self.placed_piece = PlacedPiece(placed_polygon, placed_edges, rotation_degrees)
 
 	def reset(self):
 		self.placed_piece = None

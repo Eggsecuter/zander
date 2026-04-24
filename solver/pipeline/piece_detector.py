@@ -6,6 +6,7 @@ from solver.debugger import Debugger
 from solver.models.edge import Edge
 from solver.models.piece import Piece
 
+
 EDGE_SIMPLIFY_TOLERANCE = 10.0
 MIN_EDGE_LENGTH = 100
 POLYGON_INTERSECT_SHRINK_FACTOR = -10
@@ -29,7 +30,7 @@ class PieceDetector:
 	def __extract_edges(polygon: Polygon) -> List[Edge]:
 		edges: List[Edge] = []
 
-		simplified = polygon.simplify(EDGE_SIMPLIFY_TOLERANCE)
+		simplified = polygon.simplify(EDGE_SIMPLIFY_TOLERANCE, preserve_topology=True)
 		coords = list(cast(Polygon, simplified).exterior.coords)
 
 		for i in range(len(coords) - 1):
@@ -37,9 +38,7 @@ class PieceDetector:
 
 			# flag invalid edges
 			# matcher first tries to solve with only valid edges then with all
-			if edge.length < MIN_EDGE_LENGTH:
-				edge.is_frame_edge = False
-			elif PieceDetector.__extend_line(edge.line).intersects(polygon.buffer(POLYGON_INTERSECT_SHRINK_FACTOR)):
+			if edge.length < MIN_EDGE_LENGTH or PieceDetector.__extend_line(edge.line).intersects(polygon.buffer(POLYGON_INTERSECT_SHRINK_FACTOR)):
 				edge.is_frame_edge = False
 
 			edges.append(edge)
