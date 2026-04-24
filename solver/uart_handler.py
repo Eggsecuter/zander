@@ -85,7 +85,7 @@ class UartHandler:
 
 	def __send(self, message: str):
 		Debugger.log(f"Sending {message}")
-		self.stream.write("message\n".encode('utf-8'))
+		self.stream.write(f"{message}\n".encode('utf-8'))
 
 	def __solve(self):
 		with CameraService() as cam:
