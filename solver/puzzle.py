@@ -16,9 +16,6 @@ class Puzzle:
 		if image is None:
 			raise FileNotFoundError("No image loaded to solve")
 
-		# for easier coordination rotate image by 180 degrees
-		image = cv2.flip(image, -1)
-
 		total_start_time = time.time()
 
 		contour_start_time = time.time()
