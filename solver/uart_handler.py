@@ -19,11 +19,11 @@ class UartHandler:
 			if piece.placed_piece is None:
 				continue
 
-			messages.append(f"move|x={int(piece.polygon.centroid.x)}|y={int(piece.polygon.centroid.y)}|rot=0")
+			messages.append(f"move|x={int(piece.polygon.centroid.y)}|y={int(piece.polygon.centroid.x)}|rot=0")
 			messages.append(f"pick")
 
 			# if piece.placed_piece is not None:
-			# 	messages.append(f"move|x={int(piece.placed_piece.polygon.centroid.x)}|y={int(piece.placed_piece.polygon.centroid.y)}|rot={int(piece.placed_piece.rotation_degrees * ROTATION_ACCURACY)}")
+			# 	messages.append(f"move|x={int(piece.placed_piece.polygon.centroid.y)}|y={int(piece.placed_piece.polygon.centroid.x)}|rot={int(piece.placed_piece.rotation_degrees * ROTATION_ACCURACY)}")
 
 			messages.append(f"place")
 
