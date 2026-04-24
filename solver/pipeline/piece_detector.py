@@ -1,86 +1,64 @@
-import cv2
 import numpy as np
-
-from typing import List, Tuple
+from typing import List, cast
+from shapely import Polygon
+from shapely.geometry import LineString
+from solver.debugger import Debugger
+from solver.models.edge import Edge
 from solver.models.piece import Piece
-from solver.models.puzzle_frame import PuzzleFrame
-from solver.models.vector2 import Vector2
-from solver.utility.polygon import PolygonUtility
 
-FRAME_WIDTH_PERCENTAGE = 30
 
-ROUGHENING_EPSILON: float = 0.05
-EDGE_LINE_EPSILON: float = 0.1
-EDGE_MIN_LENGTH: float = 5.0 # TODO lower
-EDGE_CORNER_MARGIN: float = 1.0
-EDGE_CORNER_MARGIN_DEGREES: float = 10.0
+EDGE_SIMPLIFY_TOLERANCE = 10.0
+MIN_EDGE_LENGTH = 100
+POLYGON_INTERSECT_SHRINK_FACTOR = -10
 
 class PieceDetector:
 	@staticmethod
-	def detect(image) -> Tuple[PuzzleFrame, List[Piece]]:
-		contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+	def detect(polygons: List[Polygon]) -> List[Piece]:
+		Debugger.log("Detecting pieces\n")
 
-		frame: PuzzleFrame = None
-		pieces: List[Piece] = []
+		pieces = []
 
-		for contour in contours:
-			coordinates = contour.reshape(-1, 2)
-			vectors = [PieceDetector.normalize_coordinate(image, coordinate[0], coordinate[1]) for coordinate in coordinates]
+		for polygon in polygons:
+			edges = PieceDetector.__extract_edges(polygon)
+			pieces.append(Piece(polygon, edges))
 
-			# frame
-			if any(vector.x < FRAME_WIDTH_PERCENTAGE for vector in vectors):
-				frame = PieceDetector.get_frame(vectors)
-			# piece
-			else:
-				points = PolygonUtility.roughen(vectors, ROUGHENING_EPSILON)
-				center_of_mass = PolygonUtility.calculate_center_of_mass(points)
-				edges = PolygonUtility.detect_edges(points, EDGE_LINE_EPSILON, EDGE_MIN_LENGTH, EDGE_CORNER_MARGIN, EDGE_CORNER_MARGIN_DEGREES)
+			Debugger.log(f"Piece with {len(polygon.exterior.coords)} points has {len(edges)} edges [{len(list(filter(lambda edge: edge.is_frame_edge, edges)))} frame edges]")
 
-				piece = Piece(points, center_of_mass, edges)
-				pieces.append(piece)
+		Debugger.log("\n")
 
-		return frame, pieces
+		return pieces
 
 	@staticmethod
-	def normalize_coordinate(image, x: float, y: float):
-		'''
-		Normalizes into percentile coordinate system with its origin point at the bottom left.
-		This allows intuitive radiant angles and also unified margin values for further matching and solving of the puzzle.
+	def __extract_edges(polygon: Polygon) -> List[Edge]:
+		edges: List[Edge] = []
 
-		Because the margin (for transposition and rotation) are absolute differently sized images would need different margin values, which gets prevented by normalizing the vectors
-		'''
-		img_height, img_width = image.shape[:2]
+		simplified = polygon.simplify(EDGE_SIMPLIFY_TOLERANCE, preserve_topology=True)
+		coords = list(cast(Polygon, simplified).exterior.coords)
 
-		# open cv has its origin point at the top left corner
-		# simplify further calculations by having the origin in the bottom left
-		y = img_height - y
+		for i in range(len(coords) - 1):
+			edge = Edge(LineString([coords[i], coords[i + 1]]), True)
 
-		# solver calculates with percentile coordinates to be compatible with any further robotic coordinate system
-		# take the longer dimension to prevent stretching
-		longer_dimension = img_width if img_width > img_height else img_height
-		x *= 100 / longer_dimension
-		y *= 100 / longer_dimension
+			# flag invalid edges
+			# matcher first tries to solve with only valid edges then with all
+			if edge.length < MIN_EDGE_LENGTH or PieceDetector.__extend_line(edge.line).intersects(polygon.buffer(POLYGON_INTERSECT_SHRINK_FACTOR)):
+				edge.is_frame_edge = False
 
-		return Vector2(float(x), float(y))
+			edges.append(edge)
+
+		# sort for performance
+		edges.sort(key=lambda edge: edge.length, reverse=True)
+
+		return edges
 
 	@staticmethod
-	def get_frame(points: List[Vector2]) -> PuzzleFrame:
-		points = np.array([[p.x, p.y] for p in points], dtype=np.float32)
+	def __extend_line(line: LineString, scale: float = 1e6) -> LineString:
+		p1, p2 = map(np.array, line.coords)
 
-		rectangle = cv2.minAreaRect(points)
-		box = cv2.boxPoints(rectangle)
+		direction = p2 - p1
+		direction = direction / np.linalg.norm(direction)
 
-		s = box.sum(axis=1)
-		diff = np.diff(box, axis=1)
+		# extend both directions
+		new_p1 = p1 - direction * scale
+		new_p2 = p2 + direction * scale
 
-		topLeft = box[np.argmax(diff)]
-		bottomRight = box[np.argmin(diff)]
-		topRight = box[np.argmax(s)]
-		bottomLeft = box[np.argmin(s)]
-
-		return PuzzleFrame(
-			topLeft=Vector2(float(topLeft[0]), float(topLeft[1])),
-			topRight=Vector2(float(topRight[0]), float(topRight[1])),
-			bottomRight=Vector2(float(bottomRight[0]), float(bottomRight[1])),
-			bottomLeft=Vector2(float(bottomLeft[0]), float(bottomLeft[1]))
-		)
+		return LineString([new_p1, new_p2])

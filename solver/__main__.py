@@ -1,42 +1,41 @@
 import sys
-import asyncio
 
-from solver.example.buffer_example import buffer
-from solver.client_handler import ClientHandler
-from solver.solver import Solver
+import cv2
 
-HOST: str = '127.0.0.1'
-PORT: int = 6048
+from solver.debugger import Debugger
+from solver.puzzle import Puzzle
+from solver.uart_handler import UartHandler
 
-async def handle_client(reader, writer):
-	handler = ClientHandler(reader, writer)
-	await handler.run()
+UART_PORT = '/dev/ttyAMA4'
 
-async def main(port: int):
-	server = await asyncio.start_server(handle_client, HOST, port, limit=10 * 1024 * 1024)
-	address = ', '.join(str(socket.getsockname()) for socket in server.sockets)
+def prod():
+	UartHandler(UART_PORT)
 
-	print(f"Serving on {address}")
+def test():
+	Debugger.enable_log()
+	UartHandler(UART_PORT)
 
-	async with server:
-		await server.serve_forever()
+def debug(path: str):
+	Debugger.enable_log()
+	Debugger.enable_plot()
 
-def main_debug():
-	main = Solver(True)
-	main.load_image_from_buffer(buffer)
-	main.run()
+	image = cv2.imread(path)
+
+	if image is None:
+		raise FileNotFoundError(f"Image not found: {path}")
+
+	solution = Puzzle.solve(image)
+
+	if solution is not None:
+		Debugger.log("Uart messages:\n")
+		for message in UartHandler.get_piece_messages(solution.pieces):
+			Debugger.log(message)
 
 if __name__ == "__main__":
-	port: int = PORT
-	debug = False
-
 	if len(sys.argv) >= 2:
-		if sys.argv[1].isdigit():
-			port = int(sys.argv[1])
-		elif sys.argv[1] == '--debug':
-			debug = True
-
-	if debug:
-		main_debug()
+		if (sys.argv[1] == '--test'):
+			test()
+		else:
+			debug(sys.argv[1])
 	else:
-		asyncio.run(main(port))
+		prod()
