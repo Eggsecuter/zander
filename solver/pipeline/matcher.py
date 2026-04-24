@@ -12,6 +12,7 @@ import solver.constants as constants
 
 PLACED_EDGE_START_MARGIN = 5.0
 PLACED_EDGE_ANGLE_MARGIN = 5.0
+MAX_A5_OVERFLOW = 100.0
 
 class Matcher:
 	def __init__(self, pieces: List[Piece]):
@@ -142,7 +143,7 @@ class Matcher:
 		height = max_y - min_y
 
 		# invalid if dimensions are far off
-		if max(width, height) > constants.A5_WIDTH_MICROMETER * 1.1 / constants.PIXEL_TO_MICROMETER_FACTOR:
+		if max(width, height) > constants.A5_WIDTH_MICROMETER * MAX_A5_OVERFLOW / constants.PIXEL_TO_MICROMETER_FACTOR:
 			return float("inf")
 
 		# get total overlap area
