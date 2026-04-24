@@ -33,7 +33,7 @@ class ContourDetector:
 		best_score = float("inf")
 		best_result: List[Polygon] = None
 
-		for threshold in range(20, 105, 5):
+		for threshold in range(20, 200, 5):
 			_, threshold_image = cv2.threshold(gaussian_image, threshold, 255, cv2.THRESH_BINARY_INV)
 			kernel = np.ones((3,3), np.uint8)
 			threshold_image = cv2.morphologyEx(threshold_image, cv2.MORPH_OPEN, kernel)
@@ -82,8 +82,9 @@ class ContourDetector:
 		total_area = sum(polygon.area for polygon in polygons)
 		area_error = abs(total_area - target_area) / target_area
 
-		# validate contour count offset
-		count_penalty = min(abs(len(polygons) - count) for count in PIECE_COUNTS)
+		# invalid puzzle piece count
+		if len(polygons) not in PIECE_COUNTS:
+			return float("inf")
 
 		# validate contour noise
 		vertex_penalty = sum(len(polygon.exterior.coords) for polygon in polygons) / len(polygons)
@@ -95,5 +96,4 @@ class ContourDetector:
 			+ vertex_penalty * 0.01
 			+ compactness_penalty * 0.1
 			+ convexity_penalty * 2
-			+ count_penalty * 10
 		)
