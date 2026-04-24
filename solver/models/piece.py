@@ -1,6 +1,5 @@
 from typing import List, Optional
 from shapely import Polygon
-from shapely.geometry.point import Point
 from shapely.affinity import rotate, translate
 
 from solver.models.cursor import Cursor
@@ -20,7 +19,7 @@ class Piece:
 		y_offset = cursor.point.y - current_edge.startY
 
 		# rotation needed to match desired direction
-		rotation_degrees = cursor.angle_degrees - current_edge.angle_degrees
+		rotation_degrees = current_edge.angle_degrees - cursor.angle_degrees
 
 		rotated_polygon = rotate(self.polygon, rotation_degrees, origin=(current_edge.startX, current_edge.startY), use_radians=False)
 		placed_polygon = translate(rotated_polygon, x_offset, y_offset)

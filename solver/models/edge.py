@@ -27,7 +27,8 @@ class Edge:
 	@property
 	def angle_degrees(self) -> float:
 		# current angle of the edge (degrees)
-		return math.degrees(math.atan2(self.endY - self.startY, self.endX - self.startX))
+		# y is inverted
+		return (math.degrees(math.atan2(self.startY - self.endY, self.endX - self.startX)) + 360) % 360
 
 	def __init__(self, line: LineString, is_frame_edge: bool):
 		self.line = line
