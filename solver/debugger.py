@@ -1,4 +1,4 @@
-from random import randint
+from datetime import datetime
 from typing import List
 import cv2
 from shapely.geometry import box
@@ -73,4 +73,4 @@ class Debugger:
 
 	@staticmethod
 	def save_image(image):
-		cv2.imwrite(f"output-{randint(1000, 9999)}.png", image)
+		cv2.imwrite(f"./data/output/{datetime.now().strftime("%Y%m%d_%H%M%S")}.png", image)
