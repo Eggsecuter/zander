@@ -1,3 +1,5 @@
+import time
+
 from typing import List
 from serial import Serial
 from services.camera import CameraService
@@ -6,6 +8,8 @@ from solver.debugger import Debugger
 from solver.models.piece import Piece
 from solver.puzzle import Puzzle
 
+
+RESET_COMMAND = "reset"
 
 class UartHandler:
 	stream: Serial
@@ -20,12 +24,12 @@ class UartHandler:
 				continue
 
 			messages.append(f"move|x={int(piece.polygon.centroid.y)}|y={int(piece.polygon.centroid.x)}|rot=0")
-			messages.append(f"pick")
+			messages.append("pick")
 
 			# if piece.placed_piece is not None:
 			# 	messages.append(f"move|x={int(piece.placed_piece.polygon.centroid.y)}|y={int(piece.placed_piece.polygon.centroid.x)}|rot={int(piece.placed_piece.rotation_degrees * ROTATION_ACCURACY)}")
 
-			messages.append(f"place")
+			messages.append("place")
 
 		return messages
 
@@ -65,6 +69,11 @@ class UartHandler:
 		message = self.messages.pop(0)
 		self.__send(message)
 
+		# if reset is remaining send it manually
+		if len(self.messages) == 1 and self.messages[0] == RESET_COMMAND:
+			time.sleep(1)
+			self.__send(message)
+
 		# listen to response
 		self.listen()
 
@@ -99,6 +108,6 @@ class UartHandler:
 		# create message list
 		self.messages.extend(UartHandler.get_piece_messages(solution.pieces))
 		self.messages.append("finish")
-		self.messages.append("reset")
+		self.messages.append(RESET_COMMAND)
 
 		Debugger.log(self.messages)
