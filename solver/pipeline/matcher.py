@@ -6,7 +6,7 @@ from shapely.ops import unary_union
 from solver.debugger import Debugger
 from solver.models.piece import Piece
 from solver.models.solution import Solution
-from solver.constants import *
+import solver.constants as constants
 
 
 class Matcher:
@@ -18,10 +18,12 @@ class Matcher:
 		if len(self.__pieces) <= 0:
 			return
 
-		# first piece is chosen to reduce calculations (else there would be multiple identical solutions)
-		for edge_index in range(len(self.__pieces[0].edges)):
-			# set relative combined puzzle start point
-			self.__place_next(0, edge_index, Point(0, 0), 0)
+		Debugger.log("Starting matching")
+		self.__run(False)
+
+		if self.__best_solution is None:
+			Debugger.log("No solution found - Starting verbose matching")
+			self.__run(True)
 
 		if self.__best_solution is None:
 			Debugger.log("Found no solution")
@@ -30,10 +32,20 @@ class Matcher:
 
 		return self.__best_solution
 
-	def __place_next(self, piece_index: int, edge_index: int, cursor: Point, angle_degrees: float):
-		# already gone full circle
+	def __run(self, verbose: bool):
+		# first piece is chosen to reduce calculations (else there would be multiple identical solutions)
+		for edge_index in range(len(self.__pieces[0].edges)):
+			if not verbose and not self.__pieces[0].edges[edge_index].is_frame_edge:
+				continue
+
+			# set relative combined puzzle start point
+			self.__place_next(0, edge_index, Point(0, 0), 0, verbose)
+
+	def __place_next(self, piece_index: int, edge_index: int, cursor: Point, angle_degrees: float, verbose: bool):
 		if angle_degrees > 360:
-			return
+			angle_degrees = 0
+
+		# TODO make more preemptive checks only if flags are set
 
 		self.__pieces[piece_index].place(edge_index, cursor, angle_degrees)
 
@@ -57,17 +69,20 @@ class Matcher:
 				continue
 
 			for edge_index, edge in enumerate(piece.edges):
+				if not verbose and not edge.is_frame_edge:
+					continue
+
 				# TODO branch into potential edges of last or already placed pieces
 				# TODO correct cursor if not really 0 or 90 degree angle
 
 				# branch into 0 degree placement
-				new_cursor = self.__move_cursor(cursor, edge.length + PIECE_MARGIN_PIXEL, angle_degrees)
-				self.__place_next(piece_index, edge_index, new_cursor, angle_degrees)
+				new_cursor = self.__move_cursor(cursor, edge.length + constants.PIECE_MARGIN_PIXEL, angle_degrees)
+				self.__place_next(piece_index, edge_index, new_cursor, angle_degrees, verbose)
 
 				# branch into 90 degree placement (for corner connections)
 				new_cursor = self.__move_cursor(cursor, edge.length, angle_degrees)
-				new_cursor = self.__move_cursor(cursor, PIECE_MARGIN_PIXEL, angle_degrees + 45)
-				self.__place_next(piece_index, edge_index, new_cursor, angle_degrees + 90)
+				new_cursor = self.__move_cursor(cursor, constants.PIECE_MARGIN_PIXEL, angle_degrees + 45)
+				self.__place_next(piece_index, edge_index, new_cursor, angle_degrees + 90, verbose)
 
 		# undo place after branching into every option is complete
 		# this ensures cleanup when backtracking
@@ -86,6 +101,8 @@ class Matcher:
 		# invalid if not all placed
 		if any(piece.placed_piece is None for piece in self.__pieces):
 			return float("inf")
+
+		# TODO early escape if dimensions are far off
 
 		polygons = [piece.placed_piece.polygon for piece in self.__pieces if piece.placed_piece is not None]
 
@@ -112,6 +129,6 @@ class Matcher:
 		height = max_y - min_y
 
 		bounding_area = width * height
-		size_difference = abs(bounding_area - A5_AREA_PIXEL)
+		size_difference = abs(bounding_area - constants.A5_AREA_PIXEL)
 
 		return overlap_area + size_difference

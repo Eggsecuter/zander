@@ -1,5 +1,6 @@
-from shapely import Point
+from typing import List
 from shapely.geometry import box
+from solver.models.piece import Piece
 from solver.plot import Plot
 from solver.constants import *
 
@@ -24,7 +25,7 @@ class Debugger:
 		print(message)
 
 	@staticmethod
-	def plot(image, pieces):
+	def plot(image, pieces: List[Piece]):
 		if not Debugger.__plot_enabled:
 			return
 
@@ -45,7 +46,10 @@ class Debugger:
 			plot.add_point(piece.polygon.centroid)
 
 			for edge in piece.edges:
-				plot.add_line(edge)
+				if not edge.is_frame_edge:
+					continue
+
+				plot.add_line(edge.line)
 
 			if piece.placed_piece is not None:
 				plot.add_polygon(piece.placed_piece.polygon, color=solved_color)

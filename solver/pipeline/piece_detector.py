@@ -1,10 +1,14 @@
-from typing import List
+import numpy as np
+from typing import List, cast
 from shapely import Polygon
 from shapely.geometry import LineString
 from solver.debugger import Debugger
+from solver.models.edge import Edge
 from solver.models.piece import Piece
 
 EDGE_SIMPLIFY_TOLERANCE = 10.0
+MIN_EDGE_LENGTH = 100
+POLYGON_INTERSECT_SHRINK_FACTOR = -10
 
 class PieceDetector:
 	@staticmethod
@@ -12,7 +16,7 @@ class PieceDetector:
 		pieces = []
 
 		for polygon in polygons:
-			edges = PieceDetector._extract_edges(polygon)
+			edges = PieceDetector.__extract_edges(polygon)
 			pieces.append(Piece(polygon, edges))
 
 			Debugger.log(f"Piece with {len(polygon.exterior.coords)} points has {len(edges)} edges")
@@ -22,12 +26,35 @@ class PieceDetector:
 		return pieces
 
 	@staticmethod
-	def _extract_edges(polygon: Polygon) -> List[LineString]:
-		edges = []
-		coords = list(polygon.simplify(EDGE_SIMPLIFY_TOLERANCE).exterior.coords)
+	def __extract_edges(polygon: Polygon) -> List[Edge]:
+		edges: List[Edge] = []
+
+		simplified = polygon.simplify(EDGE_SIMPLIFY_TOLERANCE)
+		coords = list(cast(Polygon, simplified).exterior.coords)
 
 		for i in range(len(coords) - 1):
-			edge = LineString([coords[i], coords[i + 1]])
+			edge = Edge(LineString([coords[i], coords[i + 1]]), True)
+
+			# flag invalid edges
+			# matcher first tries to solve with only valid edges then with all
+			if edge.length < MIN_EDGE_LENGTH:
+				edge.is_frame_edge = False
+			elif PieceDetector.__extend_line(edge.line).intersects(polygon.buffer(POLYGON_INTERSECT_SHRINK_FACTOR)):
+				edge.is_frame_edge = False
+
 			edges.append(edge)
 
 		return edges
+
+	@staticmethod
+	def __extend_line(line: LineString, scale: float = 1e6) -> LineString:
+		p1, p2 = map(np.array, line.coords)
+
+		direction = p2 - p1
+		direction = direction / np.linalg.norm(direction)
+
+		# extend both directions
+		new_p1 = p1 - direction * scale
+		new_p2 = p2 + direction * scale
+
+		return LineString([new_p1, new_p2])

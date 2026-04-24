@@ -13,7 +13,9 @@ class CoordinateSystem:
 
 		for piece in solution.pieces:
 			piece.polygon = CoordinateSystem.__correct_A4(piece.polygon)
-			piece.edges = [CoordinateSystem.__correct_A4(edge) for edge in piece.edges]
+
+			for edge in piece.edges:
+				edge.line = CoordinateSystem.__correct_A4(edge.line)
 
 			if piece.placed_piece is not None:
 				piece.placed_piece.polygon = CoordinateSystem.__correct_A5(piece.placed_piece.polygon)
