@@ -11,3 +11,7 @@ dependencies = [
     "opencv-contrib-python>=4.11.0.86",
     "shapely>=2.1.2",
 ]
+
+[tool.uv]
+# picamera2/libcamera sind auf dem Pi apt-installiert (nicht auf PyPI) → venv braucht Zugriff.
+system-site-packages = true
